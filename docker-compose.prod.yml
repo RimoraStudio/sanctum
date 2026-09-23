@@ -9,7 +9,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    image: sanctum/sanctum:latest # PIN THIS TO A SPECIFIC TAG
+    image: ghcr.io/rimorastudio/sanctum:latest # PIN THIS TO A SPECIFIC TAG
     build:
       context: .
       dockerfile: Dockerfile.standalone-sanctum
