@@ -1,0 +1,30 @@
+import { Helmet } from "react-helmet";
+import { useTranslation } from "react-i18next";
+
+import { PageHeader } from "@app/components/v2";
+import { envConfig } from "@app/config/env";
+
+import { EncryptionKeyRotationSection, EncryptionPageForm } from "./components";
+
+export const EncryptionPage = () => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="h-full bg-background text-foreground">
+      <Helmet>
+        <title>{t("common.head-title", { title: "Admin" })}</title>
+      </Helmet>
+      <div className="mx-auto flex flex-col justify-between">
+        <div className="mx-auto mb-6 w-full max-w-8xl">
+          <PageHeader
+            scope="instance"
+            title="Encryption"
+            description={`Manage encryption settings for your ${envConfig.PLATFORM_NAME} instance.`}
+          />
+          <EncryptionPageForm />
+          <EncryptionKeyRotationSection />
+        </div>
+      </div>
+    </div>
+  );
+};

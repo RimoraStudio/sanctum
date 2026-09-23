@@ -1,0 +1,1 @@
+export { SanctumSecretInput } from "./SanctumSecretInput";

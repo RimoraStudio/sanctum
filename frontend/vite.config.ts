@@ -1,0 +1,131 @@
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
+import react from "@vitejs/plugin-react-swc";
+import { defineConfig, loadEnv, PluginOption } from "vite";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
+import topLevelAwait from "vite-plugin-top-level-await";
+import wasm from "vite-plugin-wasm";
+import tsconfigPaths from "vite-tsconfig-paths";
+
+const virtualRouteFileChangeReloadPlugin: PluginOption = {
+  name: "watch-config-restart",
+  configureServer(server) {
+    server.watcher.add("./src/routes.ts");
+    server.watcher.on("change", (path) => {
+      if (path.endsWith("src/routes.ts")) {
+        console.log("Virtual route changed");
+        server.restart();
+      }
+    });
+  }
+};
+
+// https://vite.dev/config/
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd());
+  const allowedHosts = env.VITE_ALLOWED_HOSTS?.split(",") ?? [];
+  const version = (
+    env.SANCTUM_PLATFORM_VERSION ||
+    env.VITE_SANCTUM_PLATFORM_VERSION ||
+    "0.0.1"
+  ).replaceAll(".", "-");
+
+  return {
+    server: {
+      allowedHosts,
+      host: true,
+      port: 3000,
+      proxy: {
+        "/api": {
+          target: "http://localhost:4000",
+          changeOrigin: true,
+          secure: false,
+          ws: true
+        },
+        "/runtime-ui-env.js": {
+          target: "http://localhost:4000",
+          changeOrigin: true,
+          secure: false
+        },
+        "/scep": {
+          target: "http://localhost:4000",
+          changeOrigin: true,
+          secure: false
+        },
+        "/.well-known": {
+          target: "http://localhost:4000",
+          changeOrigin: true,
+          secure: false
+        },
+        "/secret-scanning/webhooks": {
+          target: "http://localhost:4000",
+          changeOrigin: true,
+          secure: false
+        }
+      }
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          entryFileNames: `assets/[name]-${version}-[hash].js`,
+          chunkFileNames: `assets/[name]-${version}-[hash].js`,
+          assetFileNames: `assets/[name]-${version}-[hash].[ext]`,
+          // recharts/d3 has circular dependencies so we ensure
+          // they remain in the same chunk so that the import resolution
+          // doesn't lead to uninitailized import sequences
+          manualChunks(id) {
+            if (
+              id.includes("node_modules/recharts") ||
+              id.includes("node_modules/d3-") ||
+              id.includes("node_modules/victory-vendor")
+            ) {
+              return "recharts";
+            }
+
+            return undefined;
+          }
+        }
+      }
+    },
+    optimizeDeps: {
+      // Deps that the initial esbuild scan can't reach: `react/jsx-runtime` is injected by the
+      // SWC transform (the scanner reads pre-transform source), and the rest are only imported
+      // from lazy route components. Discovering them mid-session re-runs optimizeDeps, which
+      // rotates the ?v= hash on every /node_modules/.vite/deps URL and force-reloads the page.
+      include: [
+        "react/jsx-runtime",
+        "crypto",
+        "react-icons/bs",
+        "react-icons/di",
+        "react-icons/si",
+        "react-icons/vsc",
+        "@fortawesome/free-brands-svg-icons",
+        "@fortawesome/free-regular-svg-icons"
+      ]
+    },
+    experimental: {
+      renderBuiltUrl(filename, { hostType }) {
+        if (hostType === "js") {
+          const fallback = 'function(f){ return "/" + f; }';
+          const fn = `(typeof window.__toCdnUrl === "function" ? window.__toCdnUrl : ${fallback})`;
+          return { runtime: `${fn}(${JSON.stringify(filename)})` };
+        }
+        return { relative: true };
+      }
+    },
+    plugins: [
+      tsconfigPaths(),
+      nodePolyfills({
+        globals: {
+          Buffer: true
+        }
+      }),
+      wasm(),
+      topLevelAwait(),
+      TanStackRouterVite({
+        virtualRouteConfig: "./src/routes.ts"
+      }),
+      react(),
+      virtualRouteFileChangeReloadPlugin
+    ]
+  };
+});

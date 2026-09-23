@@ -1,0 +1,38 @@
+{
+  "name": "sanctum-cli",
+  "version": "0.1.2",
+  "description": "Command-line client for the Sanctum secrets platform",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/neang-mengseang/sanctum.git",
+    "directory": "packages/cli"
+  },
+  "type": "module",
+  "bin": {
+    "sanctum": "dist/cli.js"
+  },
+  "main": "dist/cli.js",
+  "files": [
+    "dist",
+    "README.md",
+    "DEMO.md"
+  ],
+  "prepublishOnly": "npm run build",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\""
+  },
+  "dependencies": {
+    "sanctum-sdk": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

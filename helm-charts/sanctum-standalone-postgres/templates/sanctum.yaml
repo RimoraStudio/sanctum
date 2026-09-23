@@ -1,0 +1,129 @@
+{{- $sanctumValues := .Values.sanctum }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sanctum.fullname" . }}
+  annotations:
+    updatedAt: {{ now | date "2006-01-01 MST 15:04:05" | quote }}
+    {{- with $sanctumValues.deploymentAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    {{- include "sanctum.labels" . | nindent 4 }}
+spec:
+  replicas: {{ $sanctumValues.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "sanctum.matchLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "sanctum.matchLabels" . | nindent 8 }}
+      annotations:
+        updatedAt: {{ now | date "2006-01-01 MST 15:04:05" | quote }}
+        {{- with $sanctumValues.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "sanctum.serviceAccountName" . }}
+    {{- with $sanctumValues.podSecurityContext }}
+      securityContext: {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $sanctumValues.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with $sanctumValues.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $sanctumValues.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $sanctumValues.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- if $sanctumValues.image.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml $sanctumValues.image.imagePullSecrets | nindent 6 }}
+    {{- end }}
+    {{- with $sanctumValues.extraInitContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      containers:
+      - name: {{ template "sanctum.name" . }}-{{ $sanctumValues.name }}
+        image: "{{ $sanctumValues.image.repository }}:{{ $sanctumValues.image.tag }}"
+        imagePullPolicy: {{ $sanctumValues.image.pullPolicy }}
+        {{- with $sanctumValues.containerSecurityContext }}
+        securityContext: {{- toYaml . | nindent 10 }}
+        {{- end }}
+        readinessProbe:
+          httpGet:
+            path: /api/status
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        ports: 
+        - containerPort: 8080
+        env:
+        {{- if .Values.postgresql.useExistingPostgresSecret.enabled }}
+        - name: DB_CONNECTION_URI
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.postgresql.useExistingPostgresSecret.existingConnectionStringSecret.name }}
+              key: {{ .Values.postgresql.useExistingPostgresSecret.existingConnectionStringSecret.key }}
+        {{- end }}
+        {{- if .Values.postgresql.enabled }}
+        - name: DB_CONNECTION_URI
+          value: {{ include "sanctum.postgresDBConnectionString" . }}
+        {{- end }}
+        {{- if .Values.redis.enabled }}
+        - name: REDIS_URL
+          value: {{ include "sanctum.redisConnectionString" . }}
+        {{- end }}
+        {{- with $sanctumValues.extraEnv }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        envFrom:
+        - secretRef:
+            name: {{ $sanctumValues.kubeSecretRef }}
+        {{- if  $sanctumValues.resources }}
+        resources: {{- toYaml $sanctumValues.resources | nindent 12 }}
+        {{- end }}
+        {{- with $sanctumValues.extraVolumeMounts }}
+        volumeMounts:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- with $sanctumValues.extraContainers }}
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- with $sanctumValues.extraVolumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+
+apiVersion: v1
+kind: Service 
+metadata:
+  name: {{ include "sanctum.fullname" . }}
+  labels:
+    {{- include "sanctum.labels" . | nindent 4 }}
+  {{- with $sanctumValues.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ $sanctumValues.service.type }}
+  selector:
+    {{- include "sanctum.matchLabels" . | nindent 8 }}
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      {{- if eq $sanctumValues.service.type "NodePort" }}
+      nodePort: {{ $sanctumValues.service.nodePort }}
+      {{- end }}

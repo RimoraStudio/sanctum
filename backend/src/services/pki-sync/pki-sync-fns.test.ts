@@ -1,0 +1,148 @@
+import { PkiSync } from "./pki-sync-enums";
+import { getPkiSyncProviderCapabilities, matchesCertificateNameSchema, parsePkiSyncErrorMessage } from "./pki-sync-fns";
+
+// A dash-stripped UUID (what {{certificateId}}, {{profileId}}, {{applicationId}} resolve to).
+const HEX = "550e8400e29b41d4a716446655440000";
+const OTHER_HEX = "abcdef001111222233334444aaaaaaaa";
+
+describe("matchesCertificateNameSchema (managed-certificate detection for cleanup)", () => {
+  test("with no schema, treats every name as a candidate", () => {
+    expect(matchesCertificateNameSchema("literally-anything", undefined)).toBe(true);
+  });
+
+  describe('schema "Sanctum-{{certificateId}}"', () => {
+    const schema = "Sanctum-{{certificateId}}";
+
+    test("matches a name Sanctum produced", () => {
+      expect(matchesCertificateNameSchema(`Sanctum-${HEX}`, schema)).toBe(true);
+    });
+
+    test("matches any cert ID, not just one specific cert (so renewed/other certs are cleaned up)", () => {
+      expect(matchesCertificateNameSchema(`Sanctum-${OTHER_HEX}`, schema)).toBe(true);
+    });
+
+    test("rejects a name with a non-hex ID segment", () => {
+      expect(matchesCertificateNameSchema("Sanctum-not-a-real-id", schema)).toBe(false);
+    });
+
+    test("rejects an ID that is not exactly 32 hex chars", () => {
+      expect(matchesCertificateNameSchema(`Sanctum-${HEX.slice(0, 31)}`, schema)).toBe(false);
+    });
+
+    test("rejects extra prefix or suffix (anchored match)", () => {
+      expect(matchesCertificateNameSchema(`prod-Sanctum-${HEX}`, schema)).toBe(false);
+      expect(matchesCertificateNameSchema(`Sanctum-${HEX}-extra`, schema)).toBe(false);
+    });
+
+    // Deletion safety: a certificate that did NOT come from this schema must never be considered managed.
+    test("does NOT match unrelated certificates", () => {
+      expect(matchesCertificateNameSchema("my-own-prod-cert", schema)).toBe(false);
+      expect(matchesCertificateNameSchema("acme-com-2024", schema)).toBe(false);
+      expect(matchesCertificateNameSchema("", schema)).toBe(false);
+    });
+  });
+
+  test("matches profile-ID based names", () => {
+    expect(matchesCertificateNameSchema(`p-${HEX}`, "p-{{profileId}}")).toBe(true);
+    expect(matchesCertificateNameSchema("p-notaprofile", "p-{{profileId}}")).toBe(false);
+  });
+
+  test("matches application-ID based names", () => {
+    expect(matchesCertificateNameSchema(`${HEX}-cert`, "{{applicationId}}-cert")).toBe(true);
+    expect(matchesCertificateNameSchema("xyz-cert", "{{applicationId}}-cert")).toBe(false);
+  });
+
+  describe('schema "{{commonName}}-{{certificateId}}"', () => {
+    const schema = "{{commonName}}-{{certificateId}}";
+
+    test("matches arbitrary common names anchored by the cert ID", () => {
+      expect(matchesCertificateNameSchema(`app.example.com-${HEX}`, schema)).toBe(true);
+      expect(matchesCertificateNameSchema(`anything.here-${HEX}`, schema)).toBe(true);
+    });
+
+    // The wildcard is for the common-name slot only; the cert-ID anchor still has to match.
+    test("still requires a valid cert ID, so it does not match every name", () => {
+      expect(matchesCertificateNameSchema("app.example.com-nothex", schema)).toBe(false);
+    });
+  });
+
+  test("treats regex-special literal characters in the schema as literals", () => {
+    const schema = "cert.{{certificateId}}.pem";
+    expect(matchesCertificateNameSchema(`cert.${HEX}.pem`, schema)).toBe(true);
+    // The '.' must be literal, not a regex any-char.
+    expect(matchesCertificateNameSchema(`certX${HEX}Ypem`, schema)).toBe(false);
+  });
+
+  test("no longer expands {{environment}} (removed placeholder)", () => {
+    // {{environment}} is treated as a literal now, so a name where it was substituted with 'global' won't match.
+    expect(matchesCertificateNameSchema(`global-${HEX}`, "{{environment}}-{{certificateId}}")).toBe(false);
+  });
+
+  test("matches UUIDs whether dash-stripped or raw (AWS Secrets Manager stores the dashed form)", () => {
+    const dashed = "550e8400-e29b-41d4-a716-446655440000";
+    expect(matchesCertificateNameSchema(`sanctum-${HEX}`, "sanctum-{{certificateId}}")).toBe(true);
+    expect(matchesCertificateNameSchema(`sanctum-${dashed}`, "sanctum-{{certificateId}}")).toBe(true);
+  });
+
+  test("common-name slot uses a constrained charset, not a greedy .*", () => {
+    const schema = "{{commonName}}-{{certificateId}}";
+    // a value containing characters outside the sanitized set (e.g. a space) must not match
+    expect(matchesCertificateNameSchema(`weird name-${HEX}`, schema)).toBe(false);
+    expect(matchesCertificateNameSchema(`weird/name-${HEX}`, schema)).toBe(false);
+  });
+});
+
+describe("getPkiSyncProviderCapabilities: canRunPostSyncCommand", () => {
+  // The service rejects a command on this, and the UI reads it from the API to decide whether the
+  // Post-Sync Command step exists, so a destination added without it goes wrong in both places.
+  const SHELL_DESTINATIONS = [PkiSync.LinuxServer, PkiSync.WindowsServer];
+
+  test.each(SHELL_DESTINATIONS)("%s can run one", (destination) => {
+    expect(getPkiSyncProviderCapabilities(destination).canRunPostSyncCommand).toBe(true);
+  });
+
+  test.each(Object.values(PkiSync).filter((destination) => !SHELL_DESTINATIONS.includes(destination)))(
+    "%s cannot run one",
+    (destination) => {
+      expect(getPkiSyncProviderCapabilities(destination).canRunPostSyncCommand).toBe(false);
+    }
+  );
+
+  test("every destination states the capability, so a new one cannot leave it undefined", () => {
+    Object.values(PkiSync).forEach((destination) => {
+      expect(typeof getPkiSyncProviderCapabilities(destination).canRunPostSyncCommand).toBe("boolean");
+    });
+  });
+});
+
+describe("parsePkiSyncErrorMessage", () => {
+  // The three sync/import/remove message columns are varchar(1024), so an over-long message makes
+  // the status write throw and leaves the sync stuck reporting "running".
+  test("caps the message at the width of the columns it is written to", () => {
+    const message = parsePkiSyncErrorMessage(new Error("x".repeat(2000)));
+
+    expect(message).toHaveLength(1024);
+    expect(message.endsWith("...")).toBe(true);
+  });
+
+  test("caps a thrown string too", () => {
+    expect(parsePkiSyncErrorMessage("y".repeat(2000))).toHaveLength(1024);
+  });
+
+  test("leaves a provider message that fits the widened column alone", () => {
+    const provider = `GCP rejected the certificate map entry creation: ${"detail ".repeat(60)}`;
+
+    expect(provider.length).toBeGreaterThan(255);
+    expect(parsePkiSyncErrorMessage(new Error(provider))).toBe(provider);
+  });
+
+  test("leaves a message that already fits untouched", () => {
+    expect(parsePkiSyncErrorMessage(new Error("Connection refused by the destination host"))).toBe(
+      "Connection refused by the destination host"
+    );
+  });
+
+  test("falls back to a readable message for a non-error throw", () => {
+    expect(parsePkiSyncErrorMessage({ weird: true })).toBe("An unknown error occurred during PKI sync operation");
+  });
+});

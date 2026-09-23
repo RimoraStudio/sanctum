@@ -1,0 +1,4 @@
+
+> @mr-secret/sdk@0.0.0 typecheck C:\MRWork\Development\mr-secret\packages\sdk
+> tsc --noEmit
+

@@ -1,0 +1,44 @@
+##
+
+-- Sanctum Helm Chart --
+
+██╗███╗   ██╗███████╗██╗███████╗██╗ ██████╗ █████╗ ██╗     
+██║████╗  ██║██╔════╝██║██╔════╝██║██╔════╝██╔══██╗██║     
+██║██╔██╗ ██║█████╗  ██║███████╗██║██║     ███████║██║     
+██║██║╚██╗██║██╔══╝  ██║╚════██║██║██║     ██╔══██║██║     
+██║██║ ╚████║██║     ██║███████║██║╚██████╗██║  ██║███████╗
+╚═╝╚═╝  ╚═══╝╚═╝     ╚═╝╚══════╝╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝
+{{ .Chart.Name }} ({{ .Chart.Version }})
+
+
+╭―― Thank you for installing Sanctum! 👋  ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――┤
+│
+│   Sanctum / All-in-one open-source SecretOps solution to manage your secrets across your infra! 🔒🔑
+│
+│   Visit < https://sanctum.com/docs/self-hosting/overview > for further documentation about self-hosting!
+│
+│   Current installation (sanctum) :
+│   • sanctum          : {{ .Values.sanctum.enabled }}
+|   • nginx              : {{ .Values.ingress.nginx.enabled }}
+|   • Postgres DB        : {{ .Values.postgresql.enabled }}
+|   • Redis              : {{ .Values.redis.enabled }}
+│
+╰―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――┤
+
+――― Here's a list of helpful commands to get you started 📝  ―――――――――――――――――――――――――――――――――――――――――┤
+
+→ Get all the Sanctum resources (excluding secrets/pvcs)
+$ kubectl get all -n {{ .Release.Namespace }}
+ 
+→ Get your release status
+$ helm status -n {{ .Release.Namespace }} {{ .Release.Name }}
+
+→ Get your release resources
+$ helm get all -n {{ .Release.Namespace }} {{ .Release.Name }}
+
+→ Uninstall your release
+$ helm uninstall -n {{ .Release.Namespace }} {{ .Release.Name }}
+ 
+――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――┤
+
+##

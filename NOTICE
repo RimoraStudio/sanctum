@@ -1,0 +1,9 @@
+Sanctum
+Copyright (c) 2026 Rimora Studio
+
+This product is derived from Infisical (https://github.com/Infisical/infisical),
+Copyright (c) 2022 Infisical Inc., used under the MIT Expat license.
+
+Portions under any "ee/" directory are licensed under the Infisical Enterprise
+license (see ee/LICENSE) and are not open source — they are included only for
+compatibility with the upstream codebase.
