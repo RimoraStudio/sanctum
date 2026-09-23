@@ -2,12 +2,12 @@
   "name": "sanctum",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sanctum/sanctum.git"
+    "url": "git+https://github.com/RimoraStudio/sanctum.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/sanctum/sanctum/issues"
+    "url": "https://github.com/RimoraStudio/sanctum/issues"
   },
   "homepage": "https://github.com/sanctum/sanctum#readme",
   "scripts": {
