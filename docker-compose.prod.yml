@@ -13,7 +13,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.standalone-sanctum
-    pull_policy: always
+    pull_policy: missing
     env_file: .env
     ports:
       - 80:8080
