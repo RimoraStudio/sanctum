@@ -1,4 +1,4 @@
-ARG POSTHOG_HOST=https://app.posthog.com
+﻿ARG POSTHOG_HOST=https://app.posthog.com
 ARG POSTHOG_API_KEY=posthog-api-key
 ARG INTERCOM_ID=intercom-id
 ARG CAPTCHA_SITE_KEY=captcha-site-key
@@ -57,26 +57,6 @@ USER 1001
 ##
 ## BACKEND
 ##
-
-# Oracle Instant Client (parallel stage — downloads while other stages build)
-FROM debian:trixie-slim AS oracle
-RUN apt-get update && apt-get install -y unzip wget ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN ARCH=$(dpkg --print-architecture) && \
-    if [ "$ARCH" = "amd64" ]; then \
-        ORACLE_ZIP="instantclient-basic-linux.x64-23.26.0.0.0.zip" && \
-        EXPECTED_SHA="d6c79cbcf0ff209363e779855c690d4fc730aed847e9198a2c439bcf34760af5"; \
-    elif [ "$ARCH" = "arm64" ]; then \
-        ORACLE_ZIP="instantclient-basic-linux.arm64-23.26.0.0.0.zip" && \
-        EXPECTED_SHA="9c9a32051e97f087016fb334b7ad5c0aea8511ca8363afd8e0dc6ec4fc515c32"; \
-    fi && \
-    ORACLE_URL="https://download.oracle.com/otn_software/linux/instantclient/2326000/${ORACLE_ZIP}" && \
-    wget -q "$ORACLE_URL" && \
-    echo "$EXPECTED_SHA  $ORACLE_ZIP" | sha256sum -c - && \
-    mkdir -p /opt/oracle && \
-    unzip "$ORACLE_ZIP" -d /opt/oracle && \
-    rm "$ORACLE_ZIP"
 
 FROM base AS backend-build
 
@@ -148,7 +128,7 @@ ENV ChrystokiConfigurationPath=/usr/safenet/lunaclient/
 
 WORKDIR /app
 
-# Only runtime libraries needed — no compilation happens here
+# Only runtime libraries needed â€” no compilation happens here
 RUN apt-get update && apt-get install -y \
     unixodbc \
     freetds-bin \
@@ -166,56 +146,15 @@ RUN mkdir frontend-build
 # Production stage
 FROM base AS production
 
-# Runtime dependencies + build tools needed for PQC OpenSSL build
+# Runtime dependencies
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     bash \
     curl \
-    git \
     unixodbc \
     freetds-bin \
-    wget \
-    perl \
-    build-essential \
-    libssl-dev \
-    openssh-client \
-    libaio1t64 \
-    smbclient \
-    && apt-get install -y --only-upgrade \
-    libgnutls30t64 \
-    libc6 \
-    libc-bin \
-    libssl3t64 \
-    dpkg \
-    libcap2 \
-    libnghttp2-14 \
-    libngtcp2-16 \
-    libngtcp2-crypto-gnutls8 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy Oracle Instant Client from parallel stage
-COPY --from=oracle /opt/oracle /opt/oracle
-RUN ARCH=$(dpkg --print-architecture) && \
-    if [ "$ARCH" = "amd64" ]; then \
-        ln -sf /lib/x86_64-linux-gnu/libaio.so.1t64 /lib/x86_64-linux-gnu/libaio.so.1; \
-    elif [ "$ARCH" = "arm64" ]; then \
-        ln -sf /lib/aarch64-linux-gnu/libaio.so.1t64 /lib/aarch64-linux-gnu/libaio.so.1; \
-    fi && \
-    echo /opt/oracle/instantclient_23_26 > /etc/ld.so.conf.d/oracle-instantclient.conf && \
-    ldconfig
-
-# Build OpenSSL 3.5.6 for PQC (ML-DSA / SLH-DSA) certificate support.
-# Installed to /opt/openssl-pqc so it does not conflict with the system OpenSSL.
-WORKDIR /tmp/openssl-build
-RUN wget -q https://github.com/openssl/openssl/releases/download/openssl-3.5.6/openssl-3.5.6.tar.gz \
-    && echo "deae7c80cba99c4b4f940ecadb3c3338b13cb77418409238e57d7f31f2a3b736  openssl-3.5.6.tar.gz" | sha256sum -c - \
-    && tar -xf openssl-3.5.6.tar.gz \
-    && cd openssl-3.5.6 \
-    && ./Configure --prefix=/opt/openssl-pqc --openssldir=/opt/openssl-pqc/ssl no-docs \
-    && make -j"$(nproc)" \
-    && make install_sw \
-    && cd / \
-    && rm -rf /tmp/openssl-build
 
 WORKDIR /
 
