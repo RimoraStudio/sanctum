@@ -10,6 +10,9 @@ services:
       redis:
         condition: service_started
     image: sanctum/sanctum:latest # PIN THIS TO A SPECIFIC TAG
+    build:
+      context: .
+      dockerfile: Dockerfile.standalone-sanctum
     pull_policy: always
     env_file: .env
     ports:
