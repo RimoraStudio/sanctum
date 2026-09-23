@@ -22,7 +22,7 @@ export const SecretRotationV2ModalHeader = ({ type, isConfigured }: Props) => {
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-foreground">
           <span>{destinationDetails.name} secret rotation</span>
           <DocumentationLinkBadge
-            href={`https://sanctum.com/docs/documentation/platform/secret-rotation/${type}`}
+            href={`/docs#secrets-management`}
           />
         </div>
         <p className="mt-1 text-sm leading-4 font-normal text-muted">

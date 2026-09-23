@@ -31,7 +31,7 @@ export const AppConnectionHeader = ({ app, isConnected }: Props) => {
         <div className="flex items-center gap-x-2 text-mineshaft-300">
           {appDetails.name}
           <DocumentationLinkBadge
-            href={`https://sanctum.com/docs/integrations/app-connections/${app}`}
+            href={`/docs`}
           />
         </div>
         <p className="text-sm leading-4 font-normal text-mineshaft-400">

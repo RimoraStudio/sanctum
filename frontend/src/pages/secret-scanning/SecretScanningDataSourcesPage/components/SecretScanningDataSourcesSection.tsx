@@ -44,7 +44,7 @@ export const SecretScanningDataSourcesSection = () => {
           <div>
             <div className="flex items-center gap-x-2">
               <p className="text-xl font-medium text-mineshaft-100">Data Sources</p>
-              <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/secret-scanning/overview" />
+              <DocumentationLinkBadge href="/docs#secret-scanning" />
             </div>
             <p className="text-sm text-bunker-300">
               Configure Data Sources to scan for secret leaks from third-party services.

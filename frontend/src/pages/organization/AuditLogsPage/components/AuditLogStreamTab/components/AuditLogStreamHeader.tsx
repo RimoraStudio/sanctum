@@ -30,7 +30,7 @@ export const AuditLogStreamHeader = ({ provider, logStreamExists }: Props) => {
       <div>
         <div className="flex items-center gap-x-2 text-foreground">
           {providerDetails.name}
-          <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/audit-log-streams/audit-log-streams#example-providers" />
+          <DocumentationLinkBadge href="/docs" />
         </div>
         <p className="text-sm leading-4 font-normal text-muted">
           {logStreamExists

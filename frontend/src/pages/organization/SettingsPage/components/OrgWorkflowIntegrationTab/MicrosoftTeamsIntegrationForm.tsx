@@ -144,7 +144,7 @@ export const MicrosoftTeamsIntegrationForm = ({ id, onClose, onBack }: Props) =>
         Microsoft Teams tenant. See the{" "}
         <a
           className="text-org underline underline-offset-2"
-          href="https://sanctum.com/docs/documentation/platform/workflow-integrations/microsoft-teams-integration"
+          href="/docs"
           target="_blank"
           rel="noopener noreferrer"
         >

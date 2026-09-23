@@ -346,7 +346,7 @@ export const OrgGeneralAuthSection = ({
                           target="_blank"
                           rel="noreferrer"
                           className="underline underline-offset-2 hover:text-foreground"
-                          href="https://sanctum.com/docs/documentation/platform/sso/overview#sso-break-glass"
+                          href="/docs"
                         >
                           Admin Login Portal
                         </a>{" "}

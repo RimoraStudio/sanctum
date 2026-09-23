@@ -83,7 +83,7 @@ export const KmipServerTab = withPermission(
         <div className="mb-2 flex items-center justify-between">
           <div className="flex grow items-center gap-x-2">
             <h3 className="text-lg font-medium text-mineshaft-100">KMIP Servers</h3>
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/kms/kmip" />
+            <DocumentationLinkBadge href="/docs#kms" />
             <div className="flex grow" />
             <OrgPermissionCan
               I={OrgKmipServerPermissionActions.CreateKmipServers}

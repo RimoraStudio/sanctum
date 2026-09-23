@@ -10,7 +10,7 @@ Every flow in `sanctum`, end to end. Source: `src/cli.ts` (commands), `src/confi
 1. `SANCTUM_TOKEN` env var → `{ baseUrl, accessToken }`
 2. `SANCTUM_CLIENT_ID` + `SANCTUM_CLIENT_SECRET` env vars → Universal Auth
 3. Profile store `~/.sanctum/credentials.json` (mode 0600): `--profile` flag >
-   `SANCTUM_PROFILE` > store `default` > `"default"`
+   `SANCTUM_PROFILE` > `projectProfiles[projectSlug]` > store `default` > `"default"`
 4. `SANCTUM_BASE_URL` overrides the stored base URL (fallback `http://localhost:4000`)
 
 If no credentials resolve, commands die with "Not logged in".

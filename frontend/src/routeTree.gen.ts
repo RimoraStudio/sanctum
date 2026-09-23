@@ -16,6 +16,7 @@ import { Route as rootRoute } from './pages/root'
 import { Route as middlewaresRestrictLoginSignupImport } from './pages/middlewares/restrict-login-signup'
 import { Route as middlewaresAuthenticateImport } from './pages/middlewares/authenticate'
 import { Route as publicShareSecretPageRouteImport } from './pages/public/ShareSecretPage/route'
+import { Route as docsRouteImport } from './pages/docs/route'
 import { Route as authCliRedirectPageRouteImport } from './pages/auth/CliRedirectPage/route'
 import { Route as indexImport } from './pages/index'
 import { Route as middlewaresInjectOrgDetailsImport } from './pages/middlewares/inject-org-details'
@@ -410,6 +411,12 @@ const publicShareSecretPageRouteRoute = publicShareSecretPageRouteImport.update(
     getParentRoute: () => rootRoute,
   } as any,
 )
+
+const docsRouteRoute = docsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const authCliRedirectPageRouteRoute = authCliRedirectPageRouteImport.update({
   id: '/cli-redirect',
@@ -2547,6 +2554,13 @@ declare module '@tanstack/react-router' {
       path: '/cli-redirect'
       fullPath: '/cli-redirect'
       preLoaderRoute: typeof authCliRedirectPageRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof docsRouteImport
       parentRoute: typeof rootRoute
     }
     '/share-secret': {
@@ -5778,6 +5792,7 @@ const middlewaresRestrictLoginSignupRouteWithChildren =
 export interface FileRoutesByFullPath {
   '/': typeof indexRoute
   '/cli-redirect': typeof authCliRedirectPageRouteRoute
+  '/docs': typeof docsRouteRoute
   '/share-secret': typeof publicShareSecretPageRouteRoute
   '': typeof organizationLayoutRouteWithChildren
   '/password-setup': typeof authPasswordSetupPageRouteRoute
@@ -6053,6 +6068,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof indexRoute
   '/cli-redirect': typeof authCliRedirectPageRouteRoute
+  '/docs': typeof docsRouteRoute
   '/share-secret': typeof publicShareSecretPageRouteRoute
   '': typeof organizationLayoutRouteWithChildren
   '/password-setup': typeof authPasswordSetupPageRouteRoute
@@ -6304,6 +6320,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof indexRoute
   '/cli-redirect': typeof authCliRedirectPageRouteRoute
+  '/docs': typeof docsRouteRoute
   '/share-secret': typeof publicShareSecretPageRouteRoute
   '/_authenticate': typeof middlewaresAuthenticateRouteWithChildren
   '/_restrict-login-signup': typeof middlewaresRestrictLoginSignupRouteWithChildren
@@ -6591,6 +6608,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/cli-redirect'
+    | '/docs'
     | '/share-secret'
     | ''
     | '/password-setup'
@@ -6865,6 +6883,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/cli-redirect'
+    | '/docs'
     | '/share-secret'
     | ''
     | '/password-setup'
@@ -7114,6 +7133,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/cli-redirect'
+    | '/docs'
     | '/share-secret'
     | '/_authenticate'
     | '/_restrict-login-signup'
@@ -7400,6 +7420,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   indexRoute: typeof indexRoute
   authCliRedirectPageRouteRoute: typeof authCliRedirectPageRouteRoute
+  docsRouteRoute: typeof docsRouteRoute
   publicShareSecretPageRouteRoute: typeof publicShareSecretPageRouteRoute
   middlewaresAuthenticateRoute: typeof middlewaresAuthenticateRouteWithChildren
   middlewaresRestrictLoginSignupRoute: typeof middlewaresRestrictLoginSignupRouteWithChildren
@@ -7410,6 +7431,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   indexRoute: indexRoute,
   authCliRedirectPageRouteRoute: authCliRedirectPageRouteRoute,
+  docsRouteRoute: docsRouteRoute,
   publicShareSecretPageRouteRoute: publicShareSecretPageRouteRoute,
   middlewaresAuthenticateRoute: middlewaresAuthenticateRouteWithChildren,
   middlewaresRestrictLoginSignupRoute:
@@ -7432,6 +7454,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/cli-redirect",
+        "/docs",
         "/share-secret",
         "/_authenticate",
         "/_restrict-login-signup",
@@ -7444,6 +7467,9 @@ export const routeTree = rootRoute
     },
     "/cli-redirect": {
       "filePath": "auth/CliRedirectPage/route.tsx"
+    },
+    "/docs": {
+      "filePath": "docs/route.tsx"
     },
     "/share-secret": {
       "filePath": "public/ShareSecretPage/route.tsx"

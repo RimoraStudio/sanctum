@@ -71,7 +71,7 @@ export const OctopusDeployAuthorizePage = () => {
             </div>
             <span className="ml-1.5">Octopus Deploy Integration</span>
             <a
-              href="https://sanctum.com/docs/integrations/cloud/octopus-deploy"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
             >

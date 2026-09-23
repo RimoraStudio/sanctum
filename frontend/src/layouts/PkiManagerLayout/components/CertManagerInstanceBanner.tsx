@@ -44,7 +44,7 @@ export const CertManagerInstanceBanner = () => {
             </Link>
           ) : (
             <a
-              href="https://sanctum.com/docs/documentation/platform/pki/migration"
+              href="/docs#certificate-manager"
               target="_blank"
               rel="noopener noreferrer"
               className="underline underline-offset-2 hover:text-yellow"

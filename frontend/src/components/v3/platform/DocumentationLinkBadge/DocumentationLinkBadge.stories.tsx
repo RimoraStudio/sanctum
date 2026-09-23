@@ -13,7 +13,7 @@ const meta = {
   },
   tags: ["autodocs"],
   argTypes: {},
-  args: { href: "https://sanctum.com/docs/documentation/getting-started/introduction" }
+  args: { href: "/docs" }
 } satisfies Meta<typeof DocumentationLinkBadge>;
 
 export default meta;

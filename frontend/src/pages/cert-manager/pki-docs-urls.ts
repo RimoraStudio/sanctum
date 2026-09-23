@@ -2,8 +2,8 @@
  * Centralized PKI documentation URLs.
  */
 
-const PKI_DOCS_BASE_URL = "https://sanctum.com/docs/documentation/platform/pki";
-const APP_CONNECTIONS_DOCS_BASE_URL = "https://sanctum.com/docs/integrations/app-connections";
+const PKI_DOCS_BASE_URL = "/docs#certificate-manager";
+const APP_CONNECTIONS_DOCS_BASE_URL = "/docs";
 
 export const PkiDocsUrls = {
   appConnections: {

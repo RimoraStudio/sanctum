@@ -73,7 +73,7 @@ export const MembersSection = () => {
         <CardHeader>
           <CardTitle>
             {isCertManager ? "Users" : `${productLabel} Users`}
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/identities/user-identities" />
+            <DocumentationLinkBadge href="/docs" />
           </CardTitle>
           <CardDescription>
             {`Invite and manage ${productLabel.toLowerCase()} users`}

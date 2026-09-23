@@ -269,7 +269,7 @@ const Content = ({ secretRotation }: ContentProps) => {
             retired credentials will not be able to authenticate with {appName} during their{" "}
             <a
               target="_blank"
-              href="https://sanctum.com/docs/documentation/platform/secret-rotation/overview#how-rotation-works"
+              href="/docs#secrets-management"
               rel="noopener noreferrer"
               className="underline decoration-primary underline-offset-2 hover:text-mineshaft-200"
             >

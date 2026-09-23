@@ -323,7 +323,7 @@ export const ApprovalPolicyList = ({ projectId }: IProps) => {
         <CardHeader>
           <CardTitle>
             Policies
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/pr-workflows" />
+            <DocumentationLinkBadge href="/docs" />
           </CardTitle>
           <CardDescription>
             Implement granular policies for access requests and secrets management

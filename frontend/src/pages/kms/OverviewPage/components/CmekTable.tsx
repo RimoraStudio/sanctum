@@ -317,7 +317,7 @@ export const CmekTable = () => {
         <CardHeader>
           <CardTitle>
             Keys
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/kms" />
+            <DocumentationLinkBadge href="/docs#kms" />
           </CardTitle>
           <CardDescription>Manage keys and perform cryptographic operations.</CardDescription>
           <CardAction>

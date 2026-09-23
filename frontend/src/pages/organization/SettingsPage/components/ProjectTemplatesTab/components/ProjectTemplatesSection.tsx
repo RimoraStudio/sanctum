@@ -34,7 +34,7 @@ export const ProjectTemplatesSection = () => {
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-x-2">
                 <p className="text-xl font-medium text-mineshaft-100">Project Templates</p>
-                <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/project-templates" />
+                <DocumentationLinkBadge href="/docs" />
               </div>
               <OrgPermissionCan
                 I={OrgPermissionActions.Create}

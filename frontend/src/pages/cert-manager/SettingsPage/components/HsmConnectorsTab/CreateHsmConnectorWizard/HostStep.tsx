@@ -82,7 +82,7 @@ export const HostStep = ({ form, options, isLoading }: Props) => {
               <FieldDescription>
                 A{" "}
                 <a
-                  href="https://sanctum.com/docs/documentation/platform/gateways/overview"
+                  href="/docs"
                   target="_blank"
                   rel="noreferrer"
                   className="underline"
@@ -108,7 +108,7 @@ export const HostStep = ({ form, options, isLoading }: Props) => {
                 A Gateway with PKCS#11 support must be running on a machine that can reach your HSM.
                 This is set up by someone with network and infrastructure access.{" "}
                 <a
-                  href="https://sanctum.com/docs/documentation/platform/pki/settings/hsm-connectors"
+                  href="/docs#certificate-manager"
                   target="_blank"
                   rel="noreferrer"
                   className="text-primary hover:underline"

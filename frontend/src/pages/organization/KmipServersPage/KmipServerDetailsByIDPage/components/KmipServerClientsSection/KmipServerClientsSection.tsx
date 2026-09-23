@@ -32,7 +32,7 @@ export const KmipServerClientsSection = () => {
         </ol>
         <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2">
           <a
-            href="https://sanctum.com/docs/documentation/platform/kms/kmip"
+            href="/docs#kms"
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-x-2 text-sm text-mineshaft-300 transition-colors hover:text-mineshaft-100"

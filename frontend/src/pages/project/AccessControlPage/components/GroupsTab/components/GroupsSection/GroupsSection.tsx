@@ -81,7 +81,7 @@ export const GroupsSection = () => {
         <CardHeader>
           <CardTitle>
             {isCertManager ? "Groups" : `${productLabel} Groups`}
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/groups#user-groups" />
+            <DocumentationLinkBadge href="/docs" />
           </CardTitle>
           <CardDescription>{`Add and manage ${productLabel.toLowerCase()} groups`}</CardDescription>
           <CardAction>

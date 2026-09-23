@@ -21,7 +21,7 @@ export const SecretScanningDataSourceModalHeader = ({ type, isConfigured }: Prop
         <div className="flex items-center gap-x-2 text-mineshaft-300">
           {dataSourceDetails.name} Data Source
           <DocumentationLinkBadge
-            href={`https://sanctum.com/docs/documentation/platform/secret-scanning/${type}`}
+            href={`/docs#secret-scanning`}
           />
         </div>
         <p className="text-sm leading-4 text-mineshaft-400">

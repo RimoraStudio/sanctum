@@ -25,7 +25,7 @@ export const SecretSyncModalHeader = ({ destination, isConfigured, showDocLink =
           {destinationDetails.name} Sync
           {showDocLink && (
             <DocumentationLinkBadge
-              href={`https://sanctum.com/docs/integrations/secret-syncs/${destination}`}
+              href={`/docs#secrets-management`}
             />
           )}
         </div>

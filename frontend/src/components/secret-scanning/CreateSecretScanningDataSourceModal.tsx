@@ -113,7 +113,7 @@ export const CreateSecretScanningDataSourceModal = ({ onOpenChange, isOpen, ...p
           ) : (
             <div className="flex items-center gap-x-2 text-mineshaft-300">
               Add Data Source
-              <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/secret-scanning/overview" />
+              <DocumentationLinkBadge href="/docs#secret-scanning" />
             </div>
           )
         }

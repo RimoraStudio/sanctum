@@ -66,7 +66,7 @@ export const RelayDeploySection = ({ relayId, relayName, authMethod }: Props) =>
         <CardHeader>
           <CardTitle>
             <h2 id="relay-deployment-title">Deployment</h2>
-            <DocumentationLinkBadge href="https://sanctum.com/docs/cli/overview" />
+            <DocumentationLinkBadge href="/docs#cli" />
           </CardTitle>
           <CardDescription>Run this relay on a target host.</CardDescription>
           {canEditRelay && showDeploymentControls && (

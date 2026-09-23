@@ -238,7 +238,7 @@ export const OrgRoleTable = () => {
         <CardHeader>
           <CardTitle>
             {isSubOrganization ? "Sub-" : ""}Organization Roles
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/organization#roles-and-access-control" />
+            <DocumentationLinkBadge href="/docs" />
           </CardTitle>
           <CardDescription>
             Create and manage {isSubOrganization ? "sub-" : ""}organization roles

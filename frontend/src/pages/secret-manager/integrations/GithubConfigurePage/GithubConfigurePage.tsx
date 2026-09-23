@@ -313,7 +313,7 @@ export const GithubConfigurePage = () => {
               <a
                 target="_blank"
                 rel="noopener noreferrer"
-                href="https://sanctum.com/docs/integrations/cicd/githubactions"
+                href="/docs"
               >
                 <div className="mb-1 ml-2 inline-block cursor-default rounded-md bg-yellow/20 px-1.5 pt-[0.04rem] pb-[0.03rem] text-sm text-yellow opacity-80 hover:opacity-100">
                   <FontAwesomeIcon icon={faBookOpen} className="mr-1.5" />

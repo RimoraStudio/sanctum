@@ -118,7 +118,7 @@ const LogsSectionComponent = ({
                 Your audit log volume is growing. To keep searches fast and reduce database load, we
                 recommend streaming logs to an{" "}
                 <a
-                  href="https://sanctum.com/docs/documentation/platform/audit-log-streams/audit-log-streams"
+                  href="/docs"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline underline-offset-2 hover:opacity-80"
@@ -127,7 +127,7 @@ const LogsSectionComponent = ({
                 </a>{" "}
                 like Splunk or using the built-in{" "}
                 <a
-                  href="https://sanctum.com/docs/documentation/platform/audit-logs-clickhouse-setup"
+                  href="/docs#cli"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline underline-offset-2 hover:opacity-80"
@@ -142,7 +142,7 @@ const LogsSectionComponent = ({
         <CardHeader>
           <CardTitle>
             Audit History
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/audit-logs" />
+            <DocumentationLinkBadge href="/docs" />
           </CardTitle>
           <CardDescription>
             Search and review a detailed history of events
@@ -229,7 +229,7 @@ const LogsSectionComponent = ({
               Your audit log volume is growing. To keep searches fast and reduce database load, we
               recommend streaming logs to an{" "}
               <a
-                href="https://sanctum.com/docs/documentation/platform/audit-log-streams/audit-log-streams"
+                href="/docs"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline underline-offset-2 hover:opacity-80"
@@ -238,7 +238,7 @@ const LogsSectionComponent = ({
               </a>{" "}
               like Splunk or using the built-in{" "}
               <a
-                href="https://sanctum.com/docs/documentation/platform/audit-logs-clickhouse-setup"
+                href="/docs#cli"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline underline-offset-2 hover:opacity-80"

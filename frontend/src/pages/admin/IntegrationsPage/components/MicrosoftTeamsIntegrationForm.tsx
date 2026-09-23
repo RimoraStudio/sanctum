@@ -87,7 +87,7 @@ export const MicrosoftTeamsIntegrationForm = ({ adminIntegrationsConfig }: Props
               <div>
                 <Button variant="neutral" asChild>
                   <a
-                    href="https://sanctum.com/docs/documentation/platform/workflow-integrations/microsoft-teams-integration"
+                    href="/docs"
                     target="_blank"
                     rel="noopener noreferrer"
                   >

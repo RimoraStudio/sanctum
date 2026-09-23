@@ -130,7 +130,7 @@ export const TeamcityConfigurePage = () => {
             </div>
             <span className="ml-2">TeamCity Integration</span>
             <a
-              href="https://sanctum.com/docs/integrations/cloud/teamcity"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
             >

@@ -127,7 +127,7 @@ export const SecretRotationV2ConnectionField = ({ onChange: callback, isUpdate }
                   <>
                     Check out{" "}
                     <a
-                      href={`https://sanctum.com/docs/integrations/app-connections/${app}`}
+                      href={`/docs`}
                       target="_blank"
                       className="underline"
                       rel="noopener noreferrer"

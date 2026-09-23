@@ -218,7 +218,7 @@ export const IdentityTab = withProjectPermission(
           <CardHeader>
             <CardTitle>
               {isCertManager ? "Machine Identities" : `${productLabel} Machine Identities`}
-              <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/identities/machine-identities" />
+              <DocumentationLinkBadge href="/docs" />
             </CardTitle>
             <CardDescription>
               {`Create and manage ${productLabel.toLowerCase()} machine identities`}

@@ -76,7 +76,7 @@ export const GatewayDeploySection = ({ gatewayId, gatewayName, authMethod }: Pro
         <CardHeader>
           <CardTitle>
             <h2 id="gateway-deployment-title">Deployment</h2>
-            <DocumentationLinkBadge href="https://sanctum.com/docs/cli/overview" />
+            <DocumentationLinkBadge href="/docs#cli" />
           </CardTitle>
           <CardDescription>
             {isKubernetes

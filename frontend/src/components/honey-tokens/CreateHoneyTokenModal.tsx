@@ -65,7 +65,7 @@ export const CreateHoneyTokenModal = ({ onOpenChange, isOpen, ...props }: Props)
             ) : (
               <div className="flex items-center gap-x-2">
                 Add Honey Token
-                <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/honey-tokens/overview" />
+                <DocumentationLinkBadge href="/docs#secrets-management" />
               </div>
             )}
           </DialogTitle>

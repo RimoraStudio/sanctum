@@ -207,7 +207,7 @@ export const QoveryConfigurePage = () => {
             </div>
             <span className="ml-2.5">Qovery Integration </span>
             <a
-              href="https://sanctum.com/docs/integrations/cloud/qovery"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
             >

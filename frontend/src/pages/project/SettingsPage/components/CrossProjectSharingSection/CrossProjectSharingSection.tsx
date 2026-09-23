@@ -388,7 +388,7 @@ export const CrossProjectSharingSection = () => {
         <div className="flex w-full items-center justify-between">
           <CardTitle>
             Cross-Project Secret Sharing
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/secret-reference#cross-project-secret-sharing" />
+            <DocumentationLinkBadge href="/docs#secrets-management" />
           </CardTitle>
           {canCreateAnyGrant && (
             <Button

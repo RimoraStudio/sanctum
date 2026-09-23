@@ -120,7 +120,7 @@ export const IdentityProjectAdditionalPrivilegeSection = ({ identityMembershipDe
             {isCertManager
               ? "Certificate Manager Additional Privileges"
               : "Project Additional Privileges"}
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/access-controls/additional-privileges#api" />
+            <DocumentationLinkBadge href="/docs" />
           </CardTitle>
           <CardDescription>Assign one-off policies to this machine identity</CardDescription>
           {hasAdditionalPrivileges && (

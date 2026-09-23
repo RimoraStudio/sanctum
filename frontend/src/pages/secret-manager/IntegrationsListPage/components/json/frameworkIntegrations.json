@@ -5,7 +5,7 @@
         "image": "React",
         "category": "Frontend",
         "description": "Inject environment variables and secrets into your React app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/react"
+        "docsLink": "/docs"
     },
     {
         "name": "Vue",
@@ -13,7 +13,7 @@
         "image": "Vue",
         "category": "Frontend",
         "description": "Inject environment variables and secrets into your Vue.js app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/vue"
+        "docsLink": "/docs"
     },
     {
         "name": "Express",
@@ -21,7 +21,7 @@
         "image": "Express",
         "category": "Backend",
         "description": "Inject environment variables and secrets into your Express app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/express"
+        "docsLink": "/docs"
     },
     {
         "name": "Next.js",
@@ -29,7 +29,7 @@
         "image": "Next.js",
         "category": "Full-Stack",
         "description": "Inject environment variables and secrets into your Next.js app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/nextjs"
+        "docsLink": "/docs"
     },
     {
         "name": "SvelteKit",
@@ -37,7 +37,7 @@
         "image": "SvelteKit",
         "category": "Full-Stack",
         "description": "Inject environment variables and secrets into your SvelteKit app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/sveltekit"
+        "docsLink": "/docs"
     },
     {
         "name": "Django",
@@ -45,7 +45,7 @@
         "image": "Django",
         "category": "Backend",
         "description": "Inject environment variables and secrets into your Django app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/django"
+        "docsLink": "/docs"
     },
     {
         "name": "NestJS",
@@ -53,7 +53,7 @@
         "image": "NestJS",
         "category": "Backend",
         "description": "Inject environment variables and secrets into your NestJS app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/nestjs"
+        "docsLink": "/docs"
     },
     {
         "name": "Nuxt",
@@ -61,7 +61,7 @@
         "image": "Nuxt",
         "category": "Full-Stack",
         "description": "Inject environment variables and secrets into your Nuxt app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/nuxt"
+        "docsLink": "/docs"
     },
     {
         "name": "Gatsby",
@@ -69,7 +69,7 @@
         "image": "Gatsby",
         "category": "Frontend",
         "description": "Inject environment variables and secrets into your Gatsby app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/gatsby"
+        "docsLink": "/docs"
     },
     {
         "name": "Remix",
@@ -77,7 +77,7 @@
         "image": "Remix",
         "category": "Full-Stack",
         "description": "Inject environment variables and secrets into your Remix app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/remix"
+        "docsLink": "/docs"
     },
     {
         "name": "Vite",
@@ -85,7 +85,7 @@
         "image": "Vite",
         "category": "Build Tool",
         "description": "Inject environment variables and secrets into your Vite app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/vite"
+        "docsLink": "/docs"
     },
     {
         "name": "Fiber",
@@ -93,7 +93,7 @@
         "image": "Fiber",
         "category": "Backend",
         "description": "Inject environment variables and secrets into your Fiber app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/fiber"
+        "docsLink": "/docs"
     },
     {
         "name": "Flask",
@@ -101,7 +101,7 @@
         "image": "Flask",
         "category": "Backend",
         "description": "Inject environment variables and secrets into your Flask app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/flask"
+        "docsLink": "/docs"
     },
     {
         "name": "Laravel",
@@ -109,7 +109,7 @@
         "image": "Laravel",
         "category": "Backend",
         "description": "Inject environment variables and secrets into your Laravel app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/laravel"
+        "docsLink": "/docs"
     },
     {
         "name": "Rails",
@@ -117,7 +117,7 @@
         "image": "Rails",
         "category": "Backend",
         "description": "Inject environment variables and secrets into your Ruby on Rails app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/rails"
+        "docsLink": "/docs"
     },
     {
         "name": ".NET",
@@ -125,7 +125,7 @@
         "image": "DotNet",
         "category": "Backend",
         "description": "Inject environment variables and secrets into your .NET app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/dotnet"
+        "docsLink": "/docs"
     },
     {
         "name": "Spring Boot",
@@ -133,7 +133,7 @@
         "image": "Spring Boot",
         "category": "Backend",
         "description": "Inject environment variables into your Java Spring Boot app.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/spring-boot-maven"
+        "docsLink": "/docs"
     },
     {
         "name": "Gradle",
@@ -141,7 +141,7 @@
         "image": "Gradle",
         "category": "Build Tool",
         "description": "Inject environment variables into your Gradle builds.",
-        "docsLink": "https://sanctum.com/docs/integrations/build-tools/gradle"
+        "docsLink": "/docs"
     },
     {
         "name": "Ab Initio",
@@ -149,7 +149,7 @@
         "image": "Ab Initio",
         "category": "Data",
         "description": "Use Sanctum secrets in your Ab Initio data workflows.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/ab-initio"
+        "docsLink": "/docs"
     },
     {
         "name": "PM2",
@@ -157,6 +157,6 @@
         "image": "PM2",
         "category": "Process Manager",
         "description": "Inject environment variables and secrets into Node.js apps managed by PM2.",
-        "docsLink": "https://sanctum.com/docs/integrations/platforms/pm2"
+        "docsLink": "/docs"
     }
 ]

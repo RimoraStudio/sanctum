@@ -2,7 +2,7 @@ import { ProxiedServiceStep } from "./schema";
 import { envConfig } from "@app/config/env";
 
 export const PROXIED_SERVICE_QUICKSTART_URL =
-  "https://sanctum.com/docs/documentation/platform/agent-proxy/quickstart/credentials";
+  "/docs";
 
 type StepMeta = {
   step: ProxiedServiceStep;

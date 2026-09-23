@@ -361,7 +361,7 @@ export const CreateSecretSyncForm = ({
                   Step {displayedStepNumber} · {currentTab.rightLabel}
                 </p>
                 <DocumentationLinkBadge
-                  href={`https://sanctum.com/docs/integrations/secret-syncs/${destination}`}
+                  href={`/docs#secrets-management`}
                 />
               </div>
               <p className="mt-4 text-sm font-semibold text-foreground">What this step does</p>

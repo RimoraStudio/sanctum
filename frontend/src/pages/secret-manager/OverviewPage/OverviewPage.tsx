@@ -2695,7 +2695,7 @@ const OverviewPageContent = () => {
                 Inject your secrets using
                 <a
                   className="ml-1 text-mineshaft-200 underline decoration-mineshaft-400/65 underline-offset-3 duration-200 hover:text-mineshaft-100 hover:decoration-primary-600"
-                  href="https://sanctum.com/docs/cli/overview"
+                  href="/docs#cli"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -2704,7 +2704,7 @@ const OverviewPageContent = () => {
                 ,
                 <a
                   className="ml-1 text-mineshaft-200 underline decoration-mineshaft-400/65 underline-offset-3 duration-200 hover:text-mineshaft-100 hover:decoration-primary-600"
-                  href="https://sanctum.com/docs/api-reference/overview/introduction"
+                  href="/docs"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -2713,7 +2713,7 @@ const OverviewPageContent = () => {
                 ,
                 <a
                   className="ml-1 text-mineshaft-200 underline decoration-mineshaft-400/65 underline-offset-3 duration-200 hover:text-mineshaft-100 hover:decoration-primary-600"
-                  href="https://sanctum.com/docs/sdks/overview"
+                  href="/docs#sdk"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -2722,7 +2722,7 @@ const OverviewPageContent = () => {
                 , and
                 <a
                   className="ml-1 text-mineshaft-200 underline decoration-mineshaft-400/65 underline-offset-3 duration-200 hover:text-mineshaft-100 hover:decoration-primary-600"
-                  href="https://sanctum.com/docs/documentation/getting-started/introduction"
+                  href="/docs"
                   target="_blank"
                   rel="noopener noreferrer"
                 >

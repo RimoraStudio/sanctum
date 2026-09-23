@@ -105,7 +105,7 @@ const EditFolderAccessForm = ({ access, actor, environmentName, onClose }: FormP
       <SheetHeader>
         <SheetTitle className="flex items-center gap-2">
           Edit Folder Access
-          <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/access-controls/folder-rbac" />
+          <DocumentationLinkBadge href="/docs" />
         </SheetTitle>
         <div className="mt-2 flex min-w-0 items-center gap-2 text-xs">
           <FolderIcon className="size-3.5 shrink-0 text-folder" />

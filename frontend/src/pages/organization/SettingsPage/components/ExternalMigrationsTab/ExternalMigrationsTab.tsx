@@ -9,7 +9,7 @@ import { usePopUp } from "@app/hooks";
 import { SelectImportFromPlatformModal } from "./components/SelectImportFromPlatformModal";
 
 const EXTERNAL_MIGRATIONS_DOCS_HREF =
-  "https://sanctum.com/docs/documentation/platform/external-migrations/overview";
+  "/docs";
 
 export const ExternalMigrationsTab = () => {
   const { hasOrgRole } = useOrgPermission();

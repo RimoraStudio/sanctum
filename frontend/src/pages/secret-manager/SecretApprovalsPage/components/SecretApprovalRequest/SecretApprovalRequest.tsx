@@ -230,7 +230,7 @@ export const SecretApprovalRequest = () => {
         <CardHeader>
           <CardTitle>
             Change Requests
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/pr-workflows" />
+            <DocumentationLinkBadge href="/docs" />
           </CardTitle>
           <CardDescription>Review pending and closed change requests</CardDescription>
         </CardHeader>

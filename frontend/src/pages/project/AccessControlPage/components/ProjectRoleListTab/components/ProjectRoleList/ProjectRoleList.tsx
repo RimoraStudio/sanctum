@@ -204,7 +204,7 @@ export const ProjectRoleList = () => {
                 <>
                   You can use{" "}
                   <a
-                    href="https://sanctum.com/docs/documentation/platform/access-controls/additional-privileges"
+                    href="/docs"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="underline underline-offset-2"
@@ -234,7 +234,7 @@ export const ProjectRoleList = () => {
         <CardHeader>
           <CardTitle>
             {isCertManager ? "Roles" : "Project Roles"}
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/access-controls/role-based-access-controls#project-level-access-controls" />
+            <DocumentationLinkBadge href="/docs" />
           </CardTitle>
           <CardDescription>
             {isCertManager

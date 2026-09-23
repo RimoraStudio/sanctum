@@ -1,4 +1,4 @@
-/* eslint-disable no-await-in-loop */
+﻿/* eslint-disable no-await-in-loop */
 import path from "path";
 import RE2 from "re2";
 
@@ -311,7 +311,7 @@ export const interpolateSecrets = ({ projectId, secretEncKey, secretDAL, folderD
 
         if (entities.length > 1) {
           const secretReferenceEnvironment = entities[0];
-          const secretReferencePath = path.join("/", ...entities.slice(1, entities.length - 1));
+          const secretReferencePath = path.posix.join("/", ...entities.slice(1, entities.length - 1));
           const secretReferenceKey = entities[entities.length - 1];
 
           // eslint-disable-next-line
@@ -482,7 +482,7 @@ export const getAllNestedSecretReferences = (maybeSecretReference: string) => {
     .filter((el) => el.includes("."))
     .map((el) => {
       const [environment, ...secretPathList] = el.split(".");
-      return { environment, secretPath: path.join("/", ...secretPathList.slice(0, -1)) };
+      return { environment, secretPath: path.posix.join("/", ...secretPathList.slice(0, -1)) };
     });
 };
 

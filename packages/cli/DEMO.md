@@ -1,4 +1,4 @@
-# Sanctum CLI — Demo
+﻿# Sanctum CLI â€” Demo
 
 A complete walkthrough of the developer workflow: from a bare machine to an app
 running with injected secrets. No `.env` files involved.
@@ -80,7 +80,7 @@ Wrote /home/you/work/rim-api/sanctum-config.json
 }
 ```
 
-**Commit this file.** It contains no secrets — just routing. Every developer
+**Commit this file.** It contains no secrets â€” just routing. Every developer
 or CI agent that clones the repo gets the same wiring and supplies their own
 credentials.
 
@@ -103,7 +103,7 @@ sanctum run --env staging -- ./deploy.sh
 ```
 
 Your app reads `process.env.DB_URL` like normal. Secrets exist only in the
-child process environment — nothing touches disk.
+child process environment â€” nothing touches disk.
 
 ### Export when you actually need a file
 
@@ -127,22 +127,22 @@ Pushed 14 secrets to /
 
 ```
 my-mono/
-├── sanctum-config.json        # { projectSlug: "my-mono", secretPath: "/shared" }
-├── apps/
-│   ├── api/
-│   │   └── sanctum-config.json    # { secretPath: "/apps/api", imports: [] }
-│   └── web/
-│       └── sanctum-config.json    # { secretPath: "/apps/web" }
-└── .env.example
+â”œâ”€â”€ sanctum-config.json        # { projectSlug: "my-mono", secretPath: "/shared" }
+â”œâ”€â”€ apps/
+â”‚   â”œâ”€â”€ api/
+â”‚   â”‚   â””â”€â”€ sanctum-config.json    # { secretPath: "/apps/api", imports: [] }
+â”‚   â””â”€â”€ web/
+â”‚       â””â”€â”€ sanctum-config.json    # { secretPath: "/apps/web" }
+â””â”€â”€ .env.example
 ```
 
-Commands walk up from `cwd` and merge root → leaf. Inside `apps/api`, the CLI
-fetches `/shared` first, then `/apps/api` — the deeper path wins on key
+Commands walk up from `cwd` and merge root â†’ leaf. Inside `apps/api`, the CLI
+fetches `/shared` first, then `/apps/api` â€” the deeper path wins on key
 conflicts. Project/env inherit from the nearest config.
 
 ## 6. CI / machines
 
-No credentials file needed — use env vars:
+No credentials file needed â€” use env vars:
 
 ```bash
 export SANCTUM_CLIENT_ID=...
@@ -160,7 +160,8 @@ sanctum secrets list --profile ci-bot
 ```
 
 Profile resolution order: `--profile` flag > `SANCTUM_PROFILE` env >
-`"profile"` in `sanctum-config.json` > `"default"`.
+`projectProfiles` binding in `~/.sanctum/credentials.json` (set via
+`sanctum profiles use` or `sanctum init --profile`) > `"default"`.
 
 ## 7. Troubleshooting
 

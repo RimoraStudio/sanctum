@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -7,8 +7,10 @@ import { basename, dirname, join } from "node:path";
 import { SanctumApiError, SanctumSdk } from "sanctum-sdk";
 
 import {
+  getProjectProfile,
   listProfiles,
   loadCredentials,
+  setProjectProfile,
   registerChildConfig,
   resolveConfig,
   saveCredentials,
@@ -30,13 +32,13 @@ const red = (s: string | number) => c("31", s);
 const cyan = (s: string | number) => c("36", s);
 
 const die = (message: string, code = 1): never => {
-  console.error(`${red("✗")} ${message}`);
+  console.error(`${red("âœ—")} ${message}`);
   process.exit(code);
 };
 
-const ok = (message: string) => console.log(`${green("✓")} ${message}`);
+const ok = (message: string) => console.log(`${green("âœ“")} ${message}`);
 
-/** Decode a JWT payload without verification — display only. */
+/** Decode a JWT payload without verification â€” display only. */
 const decodeJwtPayload = (token: string): Record<string, unknown> | null => {
   try {
     const part = token.split(".")[1];
@@ -132,7 +134,7 @@ const cmdLogin = async (args: string[]) => {
 
     step(2, 4, "Login method");
     const method = await select("How do you want to log in?", [
-      { label: "Machine identity", value: "ua", hint: "clientId + clientSecret — recommended for dev/CI" },
+      { label: "Machine identity", value: "ua", hint: "clientId + clientSecret â€” recommended for dev/CI" },
       { label: "Access token", value: "token", hint: "paste a user or identity token" }
     ]);
 
@@ -254,9 +256,13 @@ const cmdInit = async (args: string[]) => {
     [project.includes("-") && project.length > 20 ? "projectId" : "projectSlug"]: project,
     environment,
     secretPath,
-    ...(imports.length ? { imports } : {}),
-    ...(profile ? { profile } : {})
+    ...(imports.length ? { imports } : {})
   };
+
+  // profile binding is personal: stored in ~/.sanctum/credentials.json, never the shared config
+  if (profile) {
+    setProjectProfile(project, profile);
+  }
 
   const configFile = join(process.cwd(), "sanctum-config.json");
   const force = hasFlag(args, "--force");
@@ -282,15 +288,15 @@ const cmdInit = async (args: string[]) => {
   if (rootFile) console.log(`Registered in ${rootFile}`);
   console.log(`  project:     ${project}`);
   console.log(`  environment: ${environment}`);
-  console.log(`  secretPath:  ${secretPath}${imports.length ? ` (+ imports: ${imports.join(", ")})` : ""}${profile ? `, profile: ${profile}` : ""}`);
+  console.log(`  secretPath:  ${secretPath}${imports.length ? ` (+ imports: ${imports.join(", ")})` : ""}${profile ? `, profile: ${profile} (local only)` : ""}`);
 };
 
 const cmdStatus = () => {
   const config = resolveConfig();
-  console.log(`${cyan("●")} ${bold(config.projectSlug ?? config.projectId ?? "?")} ${dim(`@ ${config.environment ?? "dev"}`)}\n`);
+  console.log(`${cyan("â—")} ${bold(config.projectSlug ?? config.projectId ?? "?")} ${dim(`@ ${config.environment ?? "dev"}`)}\n`);
   console.log(`  ${dim("config")}    ${config.configFile}`);
   console.log(`  ${dim("paths")}     ${config.paths.join(", ")}`);
-  if (config.profile) console.log(`  ${dim("profile")}   ${config.profile}`);
+  if (getProjectProfile(config.projectSlug)) console.log(`  ${dim("profile")}   ${getProjectProfile(config.projectSlug)}`);
   if (config.projects) {
     console.log(`\n  ${dim("linked projects")}`);
     for (const [dir, entry] of Object.entries(config.projects)) {
@@ -300,9 +306,25 @@ const cmdStatus = () => {
   }
 };
 
-const cmdProfiles = () => {
+const cmdProfiles = async (args: string[]) => {
   const profiles = listProfiles();
   if (!profiles.length) die("No profiles. Run `sanctum login` first.");
+
+  if (args[0] === "use") {
+    const config = resolveConfig();
+    const slug = config.projectSlug ?? config.projectId;
+    if (!slug) die("No project slug in sanctum-config.json.");
+    const current = getProjectProfile(config.projectSlug) ?? process.env.SANCTUM_PROFILE ?? "default";
+    const name = await select(`Profile for project '${slug}'`, profiles.map((p) => ({
+      label: `${p.name}  ${p.baseUrl}`,
+      value: p.name,
+      hint: p.name === current ? "current" : undefined
+    })));
+    setProjectProfile(config.projectSlug!, name);
+    ok(`${slug} -> profile '${name}' (stored locally, not in sanctum-config.json)`);
+    return;
+  }
+
   for (const p of profiles) {
     console.log(`${p.isDefault ? "*" : " "} ${p.name.padEnd(20)} ${p.baseUrl}`);
   }
@@ -322,7 +344,7 @@ const cmdProjects = async (args: string[]) => {
 
 const cmdEnvs = async (args: string[]) => {
   const config = resolveConfig();
-  const profile = takeFlag(args, "--profile") ?? config.profile;
+  const profile = takeFlag(args, "--profile") ?? getProjectProfile(config.projectSlug);
   const sdk = await getClient(profile);
   const projectId = config.projectId ?? (await sdk.projects.getBySlug(config.projectSlug!)).id;
   const { environments } = await sdk.projects.listEnvironments(projectId);
@@ -352,7 +374,7 @@ const cmdSecrets = async (args: string[]) => {
   const env = takeFlag(args, "--env");
   const path = takeFlag(args, "--path");
   const config = resolveConfig();
-  const profile = takeFlag(args, "--profile") ?? config.profile;
+  const profile = takeFlag(args, "--profile") ?? getProjectProfile(config.projectSlug);
   const sdk = await getClient(profile);
   const scope = (p?: string) => scopeQuery(config, p ?? path ?? config.secretPath ?? "/", env);
 
@@ -432,7 +454,7 @@ const diffOne = async (
 
   console.log(
     `\n${added.length} to add, ${changed.length} to update, ${removed.length} remote-only, ${unchanged} unchanged` +
-      (existsSync(file) ? `  [${file} vs ${config.projectSlug ?? config.projectId}/${config.environment ?? "dev"}]` : `  [no ${file} — showing remote-only]`)
+      (existsSync(file) ? `  [${file} vs ${config.projectSlug ?? config.projectId}/${config.environment ?? "dev"}]` : `  [no ${file} â€” showing remote-only]`)
   );
 };
 
@@ -441,11 +463,11 @@ const cmdDiff = async (args: string[]) => {
   const showValues = hasFlag(args, "--values");
   const all = hasFlag(args, "--all");
   const config = resolveConfig();
-  const profile = takeFlag(args, "--profile") ?? config.profile;
+  const profile = takeFlag(args, "--profile") ?? getProjectProfile(config.projectSlug);
   const file = args[0] ?? ".env";
   const sdk = await getClient(profile);
 
-  // monorepo: root config registers linked children — offer a scope pick
+  // monorepo: root config registers linked children â€” offer a scope pick
   if (config.projects && Object.keys(config.projects).length) {
     const rootDir = dirname(config.configFile);
     const entries = Object.keys(config.projects);
@@ -483,7 +505,7 @@ const cmdExport = async (args: string[]) => {
   const format = takeFlag(args, "--format") ?? "dotenv";
   const outFile = takeFlag(args, "--out");
   const config = resolveConfig();
-  const profile = takeFlag(args, "--profile") ?? config.profile;
+  const profile = takeFlag(args, "--profile") ?? getProjectProfile(config.projectSlug);
   const sdk = await getClient(profile);
   const merged = await fetchMergedSecrets(sdk, config, env);
 
@@ -534,11 +556,11 @@ const pullOne = async (
   if (existsSync(outFile)) {
     const { text, updated, added } = mergeDotenv(readFileSync(outFile, "utf8"), merged);
     if (!updated && !added) {
-      ok(`${outFile} already in sync — no changes.`);
+      ok(`${outFile} already in sync â€” no changes.`);
       return;
     }
     if (!skipConfirm && process.stdin.isTTY) {
-      const proceed = await select(`${outFile}: update ${updated}, add ${added} — apply?`, [
+      const proceed = await select(`${outFile}: update ${updated}, add ${added} â€” apply?`, [
         { label: "Yes", value: true },
         { label: "No", value: false }
       ]);
@@ -561,7 +583,7 @@ const cmdPull = async (args: string[]) => {
   const yes = hasFlag(args, "--yes") || hasFlag(args, "-y") || hasFlag(args, "--force");
   const outFlag = takeFlag(args, "--out");
   const config = resolveConfig();
-  const profile = takeFlag(args, "--profile") ?? config.profile;
+  const profile = takeFlag(args, "--profile") ?? getProjectProfile(config.projectSlug);
   const file = outFlag ?? args[0] ?? ".env";
   const sdk = await getClient(profile);
 
@@ -591,13 +613,13 @@ const cmdPull = async (args: string[]) => {
       await pullOne(sdk, resolveConfig(childDir), join(childDir, file), env, yes);
     }
     if (selected.length) {
-      console.log("note: pulled files contain real secret values — keep them out of git.");
+      console.log("note: pulled files contain real secret values â€” keep them out of git.");
       return;
     }
   }
 
   await pullOne(sdk, config, file, env, yes);
-  console.log("note: pulled files contain real secret values — keep them out of git.");
+  console.log("note: pulled files contain real secret values â€” keep them out of git.");
 };
 
 const cmdRun = async (args: string[]) => {
@@ -609,13 +631,13 @@ const cmdRun = async (args: string[]) => {
   if (!command.length) die("Usage: sanctum run [--env dev] [--profile x] -- <command> [args...]");
 
   const config = resolveConfig();
-  const profile = profileFlag ?? config.profile;
+  const profile = profileFlag ?? getProjectProfile(config.projectSlug);
   const sdk = await getClient(profile);
   const merged = await fetchMergedSecrets(sdk, config, env);
   if (!Object.keys(merged).length) {
     console.error(
       `warning: no secrets resolved for ${config.projectSlug ?? config.projectId}/${config.environment ?? "dev"} ` +
-        `(paths: ${config.paths.join(", ")}) — check the environment and paths exist.`
+        `(paths: ${config.paths.join(", ")}) â€” check the environment and paths exist.`
     );
   }
 
@@ -634,7 +656,7 @@ const cmdEnvFile = async (args: string[]) => {
   const file = args[0] ?? ".env";
   if (!existsSync(file)) die(`${file} not found. Create it, or fetch remote secrets first with \`sanctum pull ${file}\`.`);
   const config = resolveConfig();
-  const profile = takeFlag(args, "--profile") ?? config.profile;
+  const profile = takeFlag(args, "--profile") ?? getProjectProfile(config.projectSlug);
   const sdk = await getClient(profile);
   const values = sdk.dotenv.parseDotenv(readFileSync(file, "utf8"));
   const keys = Object.keys(values);
@@ -686,12 +708,12 @@ const cmdEnvFile = async (args: string[]) => {
 const AGENTS_SNIPPET = `
 ## Secrets management (Sanctum)
 
-This project uses the Sanctum CLI for secrets — do NOT create or commit .env files
+This project uses the Sanctum CLI for secrets â€” do NOT create or commit .env files
 with real values.
 
 - \`sanctum-config.json\` links this directory to a Sanctum project/environment/secret
   path. It is committed and contains no secrets.
-- Run the app with \`sanctum run -- <command>\` (e.g. \`sanctum run -- npm run dev\`) —
+- Run the app with \`sanctum run -- <command>\` (e.g. \`sanctum run -- npm run dev\`) â€”
   secrets are injected as env vars at launch.
 - \`sanctum secrets list\` / \`get <KEY>\` / \`set <KEY>=<v>\` read and write remote secrets.
 - \`sanctum diff\` compares a local file against remote; \`sanctum push\` uploads with a
@@ -709,11 +731,12 @@ const cmdAgents = () => {
   console.log(`Appended Sanctum section to ${target}`);
 };
 
-const HELP = `sanctum — CLI for the Sanctum secrets platform
+const HELP = `sanctum â€” CLI for the Sanctum secrets platform
 
 Usage:
   sanctum login --token <token> | --client-id <id> --client-secret <secret> [--base-url <url>] [--profile name]
   sanctum profiles                                   list saved credential profiles
+  sanctum profiles use                               pick which profile this project uses (local-only)
   sanctum init [--project <id-or-slug>] [--env dev] [--path /apps/api] [--imports /shared] [--profile name]
                                  (interactive picker when --project is omitted)
   sanctum projects list [--profile name]
@@ -729,7 +752,7 @@ Usage:
 
 Discovery: commands read the nearest sanctum-config.json upward from cwd.
 Ancestor configs merge in root->leaf order so shared folders apply repo-wide.
-The config file is safe to commit — credentials live in ~/.sanctum/credentials.json,
+The config file is safe to commit â€” credentials live in ~/.sanctum/credentials.json,
 keyed by profile. Profile resolution: --profile > SANCTUM_PROFILE > config "profile" > "default".
 `;
 
@@ -740,7 +763,7 @@ const main = async () => {
   try {
     switch (cmd) {
       case "login": return await cmdLogin(args);
-      case "profiles": return cmdProfiles();
+      case "profiles": return await cmdProfiles(args);
       case "init": return await cmdInit(args);
       case "projects": return await cmdProjects(args);
       case "status": return cmdStatus();
@@ -760,7 +783,7 @@ const main = async () => {
         const exp = claims?.exp ? new Date(Number(claims.exp) * 1000) : null;
         const valid = !exp || exp.getTime() > Date.now();
 
-        console.log(`${green("●")} ${bold("logged in")} ${dim(`as profile`)} ${cyan(profileFlag ?? process.env.SANCTUM_PROFILE ?? "default")}\n`);
+        console.log(`${green("â—")} ${bold("logged in")} ${dim(`as profile`)} ${cyan(profileFlag ?? process.env.SANCTUM_PROFILE ?? "default")}\n`);
         console.log(`  ${dim("instance")}   ${credentials.baseUrl}`);
         if (credentials.clientId) console.log(`  ${dim("clientId")}   ${credentials.clientId}`);
         if (claims?.identityId) console.log(`  ${dim("identity")}   ${String(claims.identityId)}`);
@@ -769,7 +792,7 @@ const main = async () => {
           const expired = exp.getTime() <= Date.now();
           console.log(`  ${dim("token")}      ${expired ? red("expired") : "valid until"} ${exp.toLocaleString()}`);
         }
-        if (!valid) console.log(dim("\n  token expired — next command will re-authenticate via clientId/secret"));
+        if (!valid) console.log(dim("\n  token expired â€” next command will re-authenticate via clientId/secret"));
         return;
       }
       case "--version":

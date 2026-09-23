@@ -478,7 +478,7 @@ export const OrgSsoTab = withPermission(
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-x-2">
                     {chooserExclude ? "Switch Identity Provider" : "Add Identity Provider"}
-                    <DocumentationLinkBadge href="https://sanctum.com/docs/integrations/user-authentication" />
+                    <DocumentationLinkBadge href="/docs" />
                   </DialogTitle>
                   <DialogDescription>Pick a protocol to configure.</DialogDescription>
                 </DialogHeader>

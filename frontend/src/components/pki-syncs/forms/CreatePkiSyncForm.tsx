@@ -417,7 +417,7 @@ export const CreatePkiSyncForm = ({
                   Step {selectedTabIndex + 1} · {currentDetail.rightLabel}
                 </p>
                 <DocumentationLinkBadge
-                  href={`https://sanctum.com/docs/documentation/platform/pki/applications/certificate-syncs/${destination}`}
+                  href={`/docs#certificate-manager`}
                 />
               </div>
               <p className="mt-4 text-sm font-semibold text-foreground">What this step does</p>

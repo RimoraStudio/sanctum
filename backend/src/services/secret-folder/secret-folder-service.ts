@@ -1,4 +1,4 @@
-/* eslint-disable no-await-in-loop */
+﻿/* eslint-disable no-await-in-loop */
 import { ForbiddenError, subject } from "@casl/ability";
 import { Knex } from "knex";
 import path from "path";
@@ -180,7 +180,7 @@ export const secretFolderServiceFactory = ({
       });
     }
 
-    const pathWithFolder = path.join(secretPath, name);
+    const pathWithFolder = path.posix.join(secretPath, name);
 
     const lock = await keyStore.acquireLock([KeyStorePrefixes.CreateFolderLock(env.id)], 5000, {
       retryCount: 25,
@@ -1195,7 +1195,7 @@ export const secretFolderServiceFactory = ({
         for (const folderSpec of envFolders) {
           const { name, path: secretPath, description } = folderSpec;
 
-          const pathWithFolder = path.join(secretPath, name);
+          const pathWithFolder = path.posix.join(secretPath, name);
           const parentFolder = await folderDAL.findClosestFolder(projectId, environment, pathWithFolder, tx);
 
           if (!parentFolder) {
@@ -1532,12 +1532,12 @@ export const secretFolderServiceFactory = ({
 
   // computes the reasons a folder subtree cannot be moved, shared by the read-only eligibility check and the
   // actual move. it scans the source subtree for non-static-secret resources and for source paths governed by a
-  // secret approval policy (combined into `sourceBlock`), and — when a destination is provided — also checks the
+  // secret approval policy (combined into `sourceBlock`), and â€” when a destination is provided â€” also checks the
   // destination paths for a governing policy (`destinationBlock`); a folder cannot be moved INTO a path governed
   // by a policy since the move would create its secrets there, bypassing the approval the policy requires. pass
   // `accessScope` to limit reporting to paths the actor may read; omit it (the move path) to always detect a block
   // and gate only the resulting message. pass `checkRbacPolicies` to also report whether the subtree carries
-  // folder-scoped RBAC policies (`hasRbacPolicies`) — a warning, never a block.
+  // folder-scoped RBAC policies (`hasRbacPolicies`) â€” a warning, never a block.
   const $getFolderMoveBlocks = async (
     {
       subtree,
@@ -1639,7 +1639,7 @@ export const secretFolderServiceFactory = ({
           sourceFolderPath: folder.path,
           destination:
             destinationEnvironment && canActorAccessDestination
-              ? { environment: destinationEnvironment, path: path.join(destinationParentPath, folder.name) }
+              ? { environment: destinationEnvironment, path: path.posix.join(destinationParentPath, folder.name) }
               : undefined,
           accessScope,
           checkRbacPolicies: true
@@ -1754,7 +1754,7 @@ export const secretFolderServiceFactory = ({
           message: `Destination folder with path '${destinationPath}' in environment '${destinationEnvironment}' not found`
         });
       }
-      const finalDestinationPath = path.join(destinationPath, folderName);
+      const finalDestinationPath = path.posix.join(destinationPath, folderName);
       const existingDestinationFolder = await folderDAL.findBySecretPath(
         projectId,
         destinationEnvironment,

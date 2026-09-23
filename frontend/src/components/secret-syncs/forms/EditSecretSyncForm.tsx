@@ -327,7 +327,7 @@ export const EditSecretSyncForm = ({ secretSync, onComplete, onDirtyChange, onCa
                   Step {selectedStepIndex + 1} · {currentStep.rightLabel}
                 </p>
                 <DocumentationLinkBadge
-                  href={`https://sanctum.com/docs/integrations/secret-syncs/${secretSync.destination}`}
+                  href={`/docs#secrets-management`}
                 />
               </div>
               <p className="mt-4 text-sm font-semibold text-foreground">What this step does</p>

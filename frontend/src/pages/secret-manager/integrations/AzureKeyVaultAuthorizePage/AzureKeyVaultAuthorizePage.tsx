@@ -56,7 +56,7 @@ export function AzureKeyVaultAuthorizePage() {
             </div>
             <span className="ml-2.5">Azure Key Vault Integration </span>
             <a
-              href="https://sanctum.com/docs/integrations/cloud/azure-key-vault"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
             >

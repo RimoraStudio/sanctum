@@ -81,7 +81,7 @@ export const HashicorpVaultAuthorizePage = () => {
             </div>
             <span className="ml-2.5">HashiCorp Vault Integration</span>
             <a
-              href="https://sanctum.com/docs/integrations/cloud/hashicorp-vault"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
             >

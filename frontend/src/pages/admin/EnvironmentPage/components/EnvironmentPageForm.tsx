@@ -185,7 +185,7 @@ export const EnvironmentPageForm = () => {
       <CardHeader>
         <CardTitle>
           Overrides
-          <DocumentationLinkBadge href="https://sanctum.com/docs/self-hosting/configuration/envars#environment-variable-overrides" />
+          <DocumentationLinkBadge href="/docs#self-hosting" />
         </CardTitle>
         <CardDescription>
           Override specific environment variables. Saved values may take up to five minutes to

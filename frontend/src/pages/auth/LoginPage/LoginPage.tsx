@@ -19,17 +19,25 @@ export const LoginPage = ({ isAdmin }: { isAdmin?: boolean }) => {
     <AuthPageLayout
       showFooter={false}
       bottomContent={
-        shouldDisplayLoginMethod(LoginMethod.EMAIL) ? (
-          <div className="text-xs text-label">
-            Help me{" "}
-            <Link
-              to="/account-recovery"
-              className="underline underline-offset-2 transition-colors duration-200 hover:text-foreground hover:decoration-project/45"
-            >
-              recover my account
-            </Link>
-          </div>
-        ) : undefined
+        <div className="flex items-center justify-center gap-4 text-xs text-label">
+          {shouldDisplayLoginMethod(LoginMethod.EMAIL) && (
+            <span>
+              Help me{" "}
+              <Link
+                to="/account-recovery"
+                className="underline underline-offset-2 transition-colors duration-200 hover:text-foreground hover:decoration-project/45"
+              >
+                recover my account
+              </Link>
+            </span>
+          )}
+          <Link
+            to="/docs"
+            className="underline underline-offset-2 transition-colors duration-200 hover:text-foreground hover:decoration-project/45"
+          >
+            Documentation
+          </Link>
+        </div>
       }
     >
       <Helmet>

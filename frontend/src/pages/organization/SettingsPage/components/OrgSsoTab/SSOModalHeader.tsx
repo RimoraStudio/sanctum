@@ -12,7 +12,7 @@ type Props = {
   isConnected: boolean;
 };
 
-const docsBaseUrl = "https://sanctum.com/docs/documentation/platform/sso";
+const docsBaseUrl = "/docs";
 
 export const SSOModalHeader = ({ providerDetails, isConnected }: Props) => {
   return (

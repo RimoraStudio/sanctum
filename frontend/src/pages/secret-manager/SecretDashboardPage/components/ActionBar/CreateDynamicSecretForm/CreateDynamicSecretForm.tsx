@@ -209,11 +209,6 @@ const DynamicSecretDetails = Object.fromEntries(
   DYNAMIC_SECRET_LIST.map((ds) => [ds.provider, ds.title])
 );
 
-const UniqueLinks: Record<string, string> = {
-  [DynamicSecretProviders.SqlDatabase]: "postgresql", // gotta pick one...
-  [DynamicSecretProviders.MongoAtlas]: "mongo-atlas"
-};
-
 export const CreateDynamicSecretForm = ({
   isOpen,
   onToggle,
@@ -240,7 +235,7 @@ export const CreateDynamicSecretForm = ({
           <div className="flex items-center gap-x-2">
             <span>{modalTitle ? `${modalTitle} Dynamic Secret` : "Dynamic Secrets"} </span>
             <DocumentationLinkBadge
-              href={`https://sanctum.com/docs/documentation/platform/dynamic-secrets/${selectedProvider ? (UniqueLinks[selectedProvider] ?? selectedProvider) : "overview"}`}
+              href="/docs#secrets-management"
             />
           </div>
         }

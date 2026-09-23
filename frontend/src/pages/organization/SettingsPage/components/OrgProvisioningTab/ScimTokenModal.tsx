@@ -155,7 +155,7 @@ export const ScimTokenModal = ({ popUp, handlePopUpOpen, handlePopUpToggle }: Pr
           <DialogHeader>
             <DialogTitle className="flex items-center gap-x-2">
               Manage SCIM Credentials
-              <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/scim/overview" />
+              <DocumentationLinkBadge href="/docs" />
             </DialogTitle>
             <DialogDescription>
               Generate and manage the tokens your SCIM provider uses to authenticate.

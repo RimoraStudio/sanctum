@@ -156,7 +156,7 @@ export const RelayTab = withPermission(
         <CardHeader>
           <CardTitle>
             Relays
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/gateways/relay-deployment" />
+            <DocumentationLinkBadge href="/docs#self-hosting" />
           </CardTitle>
           <CardDescription>Create and manage network relays from {envConfig.PLATFORM_NAME}</CardDescription>
           <CardAction>

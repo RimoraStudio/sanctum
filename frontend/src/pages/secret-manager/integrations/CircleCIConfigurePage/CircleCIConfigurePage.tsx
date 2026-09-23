@@ -144,7 +144,7 @@ export const CircleCIConfigurePage = () => {
             </div>
 
             <a
-              href="https://sanctum.com/docs/integrations/cicd/circleci"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
             >

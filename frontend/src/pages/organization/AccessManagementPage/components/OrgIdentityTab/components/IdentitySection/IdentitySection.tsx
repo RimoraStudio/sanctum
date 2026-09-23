@@ -174,7 +174,7 @@ const IdentitySectionContent = ({ view = "identities" }: Props) => {
           <CardHeader>
             <CardTitle>
               {isSubOrganization ? "Sub-Organization " : ""}Machine Identities
-              <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/identities/machine-identities" />
+              <DocumentationLinkBadge href="/docs" />
             </CardTitle>
             <CardDescription>
               All machine identities across your{" "}
@@ -211,7 +211,7 @@ const IdentitySectionContent = ({ view = "identities" }: Props) => {
           <CardHeader>
             <CardTitle>
               Machine Identity Auth Templates
-              <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/identities/auth-templates" />
+              <DocumentationLinkBadge href="/docs" />
             </CardTitle>
             <CardDescription>
               Reuse authentication configurations across machine identities to keep settings

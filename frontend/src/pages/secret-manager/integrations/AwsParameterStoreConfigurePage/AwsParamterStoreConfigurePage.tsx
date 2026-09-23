@@ -192,7 +192,7 @@ export const AWSParameterStoreConfigurePage = () => {
             </div>
             <span className="ml-1.5">AWS Parameter Store Integration </span>
             <a
-              href="https://sanctum.com/docs/integrations/cloud/aws-parameter-store"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
             >

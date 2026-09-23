@@ -480,7 +480,7 @@ const SettingsTab = ({
                   text: "Session playback requires the bucket to allow GET requests from this origin.",
                   callToAction: (
                     <a
-                      href="https://sanctum.com/docs/documentation/platform/pam/recording-storage"
+                      href="/docs#pam"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs underline"

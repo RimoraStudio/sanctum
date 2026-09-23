@@ -55,7 +55,7 @@ export const CertManagerSelectInstanceModal = ({
             Your organization has multiple Certificate Manager projects. Select one to continue.
             Once you&apos;ve consolidated to a single project, this prompt won&apos;t appear again.{" "}
             <a
-              href="https://sanctum.com/docs/documentation/platform/pki/migration"
+              href="/docs#certificate-manager"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary-500 hover:underline"

@@ -159,7 +159,7 @@ export const OrgCertManagerTab = () => {
                   one project per organization is supported. Select your active project and remove
                   the others once migrated.{" "}
                   <a
-                    href="https://sanctum.com/docs/documentation/platform/pki/migration"
+                    href="/docs#certificate-manager"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="underline hover:text-mineshaft-200"

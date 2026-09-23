@@ -82,7 +82,7 @@ export const AuthPageLayout = ({
           <AuthPageBackground />
           <div className="relative z-10 flex h-16 items-center justify-end px-8 xl:px-12">
             <Button asChild variant="outline" size="sm">
-              <a href="https://sanctum.com/docs" target="_blank" rel="noopener noreferrer">
+              <a href="/docs" target="_blank" rel="noopener noreferrer">
                 <BookOpen />
                 Documentation
               </a>

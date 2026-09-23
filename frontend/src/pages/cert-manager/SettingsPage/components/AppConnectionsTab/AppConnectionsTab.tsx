@@ -216,7 +216,7 @@ export const AppConnectionsTab = () => {
       <CardHeader>
         <CardTitle>
           App Connections
-          <DocumentationLinkBadge href="https://sanctum.com/docs/integrations/app-connections/overview" />
+          <DocumentationLinkBadge href="/docs" />
         </CardTitle>
         <CardDescription>
           Connect third-party services to issue or distribute certificates

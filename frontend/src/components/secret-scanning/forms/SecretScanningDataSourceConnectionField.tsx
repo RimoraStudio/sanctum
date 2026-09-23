@@ -62,7 +62,7 @@ export const SecretScanningDataSourceConnectionField = ({
                 <p>
                   Check out{" "}
                   <a
-                    href={`https://sanctum.com/docs/integrations/app-connections/${app}`}
+                    href={`/docs`}
                     target="_blank"
                     className="underline"
                     rel="noopener noreferrer"

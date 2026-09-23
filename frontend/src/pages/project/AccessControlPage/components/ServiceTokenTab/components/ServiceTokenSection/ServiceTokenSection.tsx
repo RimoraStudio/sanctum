@@ -78,7 +78,7 @@ export const ServiceTokenSection = withProjectPermission(
           <CardHeader>
             <CardTitle>
               Service Tokens
-              <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/token" />
+              <DocumentationLinkBadge href="/docs" />
             </CardTitle>
             <CardDescription>{t("section.token.service-tokens-description")}</CardDescription>
             <CardAction>

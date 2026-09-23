@@ -96,7 +96,7 @@ export const SecretSyncsTab = () => {
         <CardHeader>
           <CardTitle>
             Secret Syncs
-            <DocumentationLinkBadge href="https://sanctum.com/docs/integrations/secret-syncs/overview" />
+            <DocumentationLinkBadge href="/docs#secrets-management" />
           </CardTitle>
           <CardDescription>
             Use App Connections to sync secrets to third-party services.

@@ -12,7 +12,6 @@ export interface ProjectConfig {
   environment?: string;
   secretPath?: string;
   imports?: string[];
-  profile?: string;
   /** monorepo index: relative dir -> its sanctum-config.json path (or inline context) */
   projects?: Record<string, string | { projectSlug?: string; secretPath?: string; environment?: string }>;
 }
@@ -33,6 +32,8 @@ export interface Credentials {
 interface CredentialStore {
   default?: string;
   profiles: Record<string, Credentials>;
+  /** local-only projectSlug -> profile name mapping (never committed) */
+  projectProfiles?: Record<string, string>;
 }
 
 const credentialsPath = () => join(homedir(), CREDENTIALS_DIR, CREDENTIALS_FILE);
@@ -91,6 +92,17 @@ export const listProfiles = (): { name: string; isDefault: boolean; baseUrl: str
     isDefault: store.default === name,
     baseUrl: c.baseUrl
   }));
+};
+
+/** Profile mapped to a project slug, or undefined. */
+export const getProjectProfile = (projectSlug?: string): string | undefined =>
+  (projectSlug && readStore().projectProfiles?.[projectSlug]) || undefined;
+
+/** Map the current project to a profile (local store only — safe for shared configs). */
+export const setProjectProfile = (projectSlug: string, profile: string): void => {
+  const store = readStore();
+  store.projectProfiles = { ...(store.projectProfiles ?? {}), [projectSlug]: profile };
+  writeFileSync(credentialsPath(), JSON.stringify(store, null, 2) + "\n", { mode: 0o600 });
 };
 
 /**

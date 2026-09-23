@@ -62,8 +62,7 @@ shared secrets at the root and per-app folders in subdirectories:
   "projectSlug": "my-mono",
   "environment": "dev",
   "secretPath": "/apps/api",
-  "imports": ["/shared"],
-  "profile": "deploy-bot"
+  "imports": ["/shared"]
 }
 ```
 
@@ -105,10 +104,16 @@ live in `~/.sanctum/credentials.json` (mode 600), keyed by profile:
   "profiles": {
     "default": { "baseUrl": "http://localhost:4000", "accessToken": "..." },
     "deploy-bot": { "baseUrl": "...", "clientId": "...", "clientSecret": "..." }
-  }
+  },
+  "projectProfiles": { "my-app": "deploy-bot" }
 }
 ```
 
-Resolution order: `--profile` flag > `SANCTUM_PROFILE` env > `sanctum-config.json` `"profile"` > `"default"`.
+Resolution order: `--profile` flag > `SANCTUM_PROFILE` env >
+`projectProfiles[projectSlug]` (local per-project binding, set via
+`sanctum profiles use` or `sanctum init --profile`) > `"default"`.
+
+Profiles never live in `sanctum-config.json` — teammates sharing the file
+keep their own local bindings.
 
 Env-var auth (CI): `SANCTUM_TOKEN`, or `SANCTUM_CLIENT_ID` + `SANCTUM_CLIENT_SECRET` (+ `SANCTUM_BASE_URL`).

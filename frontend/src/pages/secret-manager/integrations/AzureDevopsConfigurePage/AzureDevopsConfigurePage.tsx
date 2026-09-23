@@ -120,7 +120,7 @@ export const AzureDevopsConfigurePage = () => {
             </div>
             <span className="ml-1.5">Azure DevOps Integration </span>
             <a
-              href="https://sanctum.com/docs/integrations/cloud/azure-devops"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
             >

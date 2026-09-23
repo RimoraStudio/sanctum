@@ -83,7 +83,7 @@ export const TerraformCloudAuthorizePage = () => {
             <span className="ml-1.5">Terraform Cloud Integration </span>
             <a
               target="_blank"
-              href="https://sanctum.com/docs/integrations/cloud/terraform-cloud"
+              href="/docs"
               rel="noopener noreferrer"
             >
               <div className="mb-1 ml-2 inline-block cursor-default rounded-md bg-yellow/20 px-1.5 pt-[0.04rem] pb-[0.03rem] text-sm text-yellow opacity-80 hover:opacity-100">

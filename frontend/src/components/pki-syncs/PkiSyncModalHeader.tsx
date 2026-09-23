@@ -21,7 +21,7 @@ export const PkiSyncModalHeader = ({ destination, isConfigured }: Props) => {
         <div className="flex items-center gap-x-2 text-mineshaft-300">
           {destinationDetails.name} Certificate Sync
           <DocumentationLinkBadge
-            href={`https://sanctum.com/docs/documentation/platform/pki/applications/certificate-syncs/${destination}`}
+            href={`/docs#certificate-manager`}
           />
         </div>
         <p className="text-sm leading-4 text-mineshaft-400">

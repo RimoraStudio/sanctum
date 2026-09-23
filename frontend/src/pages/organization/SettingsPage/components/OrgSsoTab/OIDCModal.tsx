@@ -236,7 +236,7 @@ export const OIDCModal = ({ popUp, handlePopUpClose, handlePopUpToggle, hideDele
             <SheetHeader>
               <SheetTitle className="flex items-center gap-x-2">
                 Manage OIDC Configuration
-                <DocumentationLinkBadge href="https://sanctum.com/docs/integrations/user-authentication" />
+                <DocumentationLinkBadge href="/docs" />
               </SheetTitle>
             </SheetHeader>
             <div className="thin-scrollbar flex-1 overflow-y-auto p-4">

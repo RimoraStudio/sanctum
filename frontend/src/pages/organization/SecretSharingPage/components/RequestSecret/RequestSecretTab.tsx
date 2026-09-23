@@ -53,7 +53,7 @@ export const RequestSecretTab = () => {
       <CardHeader>
         <CardTitle>
           Secret Requests
-          <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/secret-sharing" />
+          <DocumentationLinkBadge href="/docs#secrets-management" />
         </CardTitle>
         <CardDescription>Request and manage secrets from your team</CardDescription>
         <CardAction>

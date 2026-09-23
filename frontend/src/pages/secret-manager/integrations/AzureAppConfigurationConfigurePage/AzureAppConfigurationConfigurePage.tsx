@@ -170,7 +170,7 @@ export const AzureAppConfigurationConfigurePage = () => {
             </div>
             <span className="ml-1.5">Azure App Configuration</span>
             <a
-              href="https://sanctum.com/docs/integrations/cloud/azure-app-configuration"
+              href="/docs#self-hosting"
               target="_blank"
               rel="noopener noreferrer"
             >

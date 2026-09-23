@@ -1,6 +1,5 @@
 import {
   ProjectPermissionActions,
-  ProjectPermissionGroupActions,
   ProjectPermissionIdentityActions,
   ProjectPermissionMemberActions,
   ProjectPermissionSub,
@@ -14,7 +13,7 @@ export const useCanSeeAccessManagement = () => {
   return (
     permission.can(ProjectPermissionMemberActions.Read, ProjectPermissionSub.Member) ||
     permission.can(ProjectPermissionIdentityActions.Read, ProjectPermissionSub.Identity) ||
-    permission.can(ProjectPermissionGroupActions.Read, ProjectPermissionSub.Groups) ||
+    permission.can(ProjectPermissionActions.Read, ProjectPermissionSub.Groups) ||
     permission.can(ProjectPermissionActions.Read, ProjectPermissionSub.Role)
   );
 };

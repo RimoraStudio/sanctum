@@ -23,7 +23,7 @@ export const SecretScanningFindingsSection = () => {
         <div>
           <div className="flex items-center gap-x-2">
             <p className="text-xl font-medium text-mineshaft-100">Findings</p>
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/secret-scanning/usage#findings" />
+            <DocumentationLinkBadge href="/docs#secret-scanning" />
           </div>
           <p className="text-sm text-bunker-300">
             Secret leaks discovered across your data sources

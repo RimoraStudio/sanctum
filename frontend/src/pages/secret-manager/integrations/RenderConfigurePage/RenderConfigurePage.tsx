@@ -138,7 +138,7 @@ export const RenderConfigurePage = () => {
             </div>
             <span className="ml-2.5">Render Integration </span>
             <a
-              href="https://sanctum.com/docs/integrations/cloud/render"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
             >

@@ -87,7 +87,7 @@ export const OrgGroupsSection = () => {
         <CardHeader>
           <CardTitle>
             {isSubOrganization ? "Sub-" : ""}Organization Groups
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/groups" />
+            <DocumentationLinkBadge href="/docs" />
           </CardTitle>
           <CardDescription>
             Create and manage {isSubOrganization ? "sub-" : ""}organization groups

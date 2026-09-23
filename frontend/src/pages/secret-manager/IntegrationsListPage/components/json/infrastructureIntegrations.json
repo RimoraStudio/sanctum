@@ -5,7 +5,7 @@
         "image": "Docker",
         "category": "Containers",
         "description": "Inject environment variables into your Docker containers.",
-        "docsLink": "https://sanctum.com/docs/integrations/platforms/docker"
+        "docsLink": "/docs"
     },
     {
         "name": "Docker Compose",
@@ -13,7 +13,7 @@
         "image": "Docker Compose",
         "category": "Containers",
         "description": "Inject environment variables into services in your Docker Compose file.",
-        "docsLink": "https://sanctum.com/docs/integrations/platforms/docker-compose"
+        "docsLink": "/docs"
     },
     {
         "name": "Kubernetes",
@@ -21,7 +21,7 @@
         "image": "Kubernetes",
         "category": "Kubernetes",
         "description": "Inject, push, and manage secrets in your clusters with the Sanctum Operator.",
-        "docsLink": "https://sanctum.com/docs/integrations/platforms/kubernetes"
+        "docsLink": "/docs"
     },
     {
         "name": "Terraform",
@@ -29,7 +29,7 @@
         "image": "Terraform",
         "category": "IaC",
         "description": "Fetch secrets in Terraform using data sources or ephemeral resources.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/terraform"
+        "docsLink": "/docs"
     },
     {
         "name": "Jenkins",
@@ -37,7 +37,7 @@
         "image": "Jenkins",
         "category": "CI/CD",
         "description": "Fetch secrets in your Jenkins pipelines.",
-        "docsLink": "https://sanctum.com/docs/integrations/cicd/jenkins"
+        "docsLink": "/docs"
     },
     {
         "name": "Sanctum Agent",
@@ -45,7 +45,7 @@
         "image": "Agent",
         "category": "Sanctum",
         "description": "Continuously fetch and render secrets to files or processes.",
-        "docsLink": "https://sanctum.com/docs/integrations/platforms/sanctum-agent"
+        "docsLink": "/docs"
     },
     {
         "name": "Amazon ECS",
@@ -53,7 +53,7 @@
         "image": "Amazon ECS",
         "category": "AWS",
         "description": "Deliver secrets to Amazon ECS workloads with the Sanctum Agent.",
-        "docsLink": "https://sanctum.com/docs/integrations/platforms/ecs-with-agent"
+        "docsLink": "/docs"
     },
     {
         "name": "Ansible",
@@ -61,7 +61,7 @@
         "image": "Ansible",
         "category": "Automation",
         "description": "Manage secrets in your Ansible playbooks with the Sanctum collection.",
-        "docsLink": "https://sanctum.com/docs/integrations/platforms/ansible"
+        "docsLink": "/docs"
     },
     {
         "name": "Pulumi",
@@ -69,7 +69,7 @@
         "image": "Pulumi",
         "category": "IaC",
         "description": "Manage Sanctum secrets and resources in Pulumi via the Terraform Bridge.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/pulumi"
+        "docsLink": "/docs"
     },
     {
         "name": "Packer",
@@ -77,7 +77,7 @@
         "image": "Packer",
         "category": "IaC",
         "description": "Fetch secrets in your Packer builds using a data source.",
-        "docsLink": "https://sanctum.com/docs/integrations/frameworks/packer"
+        "docsLink": "/docs"
     },
     {
         "name": "AWS Lambda",
@@ -85,7 +85,7 @@
         "image": "AWS Lambda",
         "category": "AWS",
         "description": "Use Sanctum secrets in your AWS Lambda functions.",
-        "docsLink": "https://sanctum.com/docs/integrations/platforms/aws/lambda"
+        "docsLink": "/docs"
     },
     {
         "name": "AWS Amplify",
@@ -93,7 +93,7 @@
         "image": "AWS Amplify",
         "category": "CI/CD",
         "description": "Access secrets at AWS Amplify build time.",
-        "docsLink": "https://sanctum.com/docs/integrations/cicd/aws-amplify"
+        "docsLink": "/docs"
     },
     {
         "name": "Apache Airflow",
@@ -101,7 +101,7 @@
         "image": "Apache Airflow",
         "category": "Orchestration",
         "description": "Use Sanctum as a custom secrets backend for Apache Airflow.",
-        "docsLink": "https://sanctum.com/docs/integrations/platforms/apache-airflow"
+        "docsLink": "/docs"
     },
     {
         "name": "GitHub Actions",
@@ -109,7 +109,7 @@
         "image": "GitHub",
         "category": "CI/CD",
         "description": "Fetch secrets in GitHub Actions workflows using OIDC authentication.",
-        "docsLink": "https://sanctum.com/docs/integrations/cicd/githubactions"
+        "docsLink": "/docs"
     },
     {
         "name": "Kubernetes CSI",
@@ -117,7 +117,7 @@
         "image": "Kubernetes",
         "category": "Kubernetes",
         "description": "Mount secrets directly into pods with the Sanctum CSI provider.",
-        "docsLink": "https://sanctum.com/docs/integrations/platforms/kubernetes-csi"
+        "docsLink": "/docs"
     },
     {
         "name": "Kubernetes Agent Injector",
@@ -125,7 +125,7 @@
         "image": "Kubernetes",
         "category": "Kubernetes",
         "description": "Inject secrets directly into pods with the Sanctum Agent Injector.",
-        "docsLink": "https://sanctum.com/docs/integrations/platforms/kubernetes-injector"
+        "docsLink": "/docs"
     },
     {
         "name": "Backstage",
@@ -133,7 +133,7 @@
         "image": "Backstage",
         "category": "Developer Portal",
         "description": "Manage secrets from your Backstage portal with the Sanctum plugin.",
-        "docsLink": "https://sanctum.com/docs/integrations/external/backstage"
+        "docsLink": "/docs"
     },
     {
         "name": "Microsoft Power Apps",
@@ -141,6 +141,6 @@
         "image": "Microsoft Power Apps",
         "category": "Low Code",
         "description": "Fetch secrets in Power Apps through an Azure Function and custom connector.",
-        "docsLink": "https://sanctum.com/docs/integrations/external/microsoft-power-apps"
+        "docsLink": "/docs"
     }
 ]

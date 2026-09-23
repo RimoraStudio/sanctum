@@ -68,7 +68,7 @@ export const NativeIntegrationsCreationBlockedModal = ({ isOpen, onOpenChange }:
             third-party services. Your existing integrations will keep syncing until the retirement
             date.{" "}
             <a
-              href="https://sanctum.com/docs/integrations/secret-syncs/native-integrations-migration"
+              href="/docs#secrets-management"
               target="_blank"
               rel="noreferrer"
               className="underline hover:opacity-80"

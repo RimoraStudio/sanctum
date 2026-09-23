@@ -23,7 +23,7 @@ export const EmailServiceSetupModal = ({ isOpen, onOpenChange }: Props) => (
           Email Service Not Configured
           <DocumentationLinkBadge
             variant="minified"
-            href="https://sanctum.com/docs/self-hosting/configuration/envars#email-service"
+            href="/docs#self-hosting"
           />
         </DialogTitle>
         <DialogDescription>

@@ -49,7 +49,7 @@ export const GithubAuthorizePage = () => {
             </div>
             <span className="ml-2.5">GitHub Integration </span>
             <a
-              href="https://sanctum.com/docs/integrations/cicd/githubactions"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
             >

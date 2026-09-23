@@ -119,7 +119,7 @@ export const DatabricksConfigurePage = () => {
             </div>
             <span className="ml-1.5">Databricks Integration </span>
             <a
-              href="https://sanctum.com/docs/integrations/cloud/databricks"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
             >

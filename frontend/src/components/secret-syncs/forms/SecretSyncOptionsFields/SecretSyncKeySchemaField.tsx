@@ -126,7 +126,7 @@ export const SecretSyncKeySchemaField = () => {
                   </code>
                   .{" "}
                   <a
-                    href="https://sanctum.com/docs/integrations/secret-syncs/overview#key-schemas"
+                    href="/docs#secrets-management"
                     target="_blank"
                     rel="noopener noreferrer"
                   >

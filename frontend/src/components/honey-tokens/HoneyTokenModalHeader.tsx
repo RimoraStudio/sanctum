@@ -20,7 +20,7 @@ export const HoneyTokenModalHeader = ({ type, isEdit }: Props) => {
       <div>
         <div className="flex items-center gap-x-2 text-mineshaft-300">
           {isEdit ? "Edit" : ""} {details.name} Honey Token
-          <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/honey-tokens/overview" />
+          <DocumentationLinkBadge href="/docs#secrets-management" />
         </div>
         <p className="text-sm leading-4 text-mineshaft-400">
           Plant a decoy credential that alerts on access

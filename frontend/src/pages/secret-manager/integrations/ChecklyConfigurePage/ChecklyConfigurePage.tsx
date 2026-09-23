@@ -154,7 +154,7 @@ export const ChecklyConfigurePage = () => {
             </div>
             <span className="ml-2.5">Checkly Integration </span>
             <a
-              href="https://sanctum.com/docs/integrations/cloud/checkly"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
             >

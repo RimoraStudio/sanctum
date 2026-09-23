@@ -1,4 +1,4 @@
-import path from "node:path";
+﻿import path from "node:path";
 
 import RE2 from "re2";
 
@@ -57,14 +57,14 @@ export const getAllSecretReferences = (maybeSecretReference: string) => {
         return {
           targetProjectSlug: projectSlugWithAt.slice(1),
           environment,
-          secretPath: path.join("/", ...rest.slice(0, -1)),
+          secretPath: path.posix.join("/", ...rest.slice(0, -1)),
           secretKey: rest[rest.length - 1]
         };
       }
       const [environment, ...secretPathList] = parts;
       return {
         environment,
-        secretPath: path.join("/", ...secretPathList.slice(0, -1)),
+        secretPath: path.posix.join("/", ...secretPathList.slice(0, -1)),
         secretKey: secretPathList[secretPathList.length - 1]
       };
     });
@@ -319,7 +319,7 @@ export const expandSecretReferencesFactory = ({
             isCrossProjectRef = true;
             const crossProjSlug = entities[0].slice(1);
             const crossProjEnv = entities[1];
-            const crossProjPath = path.join("/", ...entities.slice(2, entities.length - 1));
+            const crossProjPath = path.posix.join("/", ...entities.slice(2, entities.length - 1));
             const crossProjKey = entities[entities.length - 1];
 
             const sourceProjectId = slugToProjectId.get(crossProjSlug) ?? null;
@@ -345,7 +345,7 @@ export const expandSecretReferencesFactory = ({
                   secretCache[crossProjCacheKey] = {};
                   crossProjSecretData = { value: "", tags: [], exists: false };
                 } else {
-                  // Verify that a folder grant exists: source folder → current target project
+                  // Verify that a folder grant exists: source folder â†’ current target project
                   // eslint-disable-next-line no-await-in-loop
                   const [grant] = await projectFolderGrantDAL.find({
                     sourceProjectId,
@@ -409,7 +409,7 @@ export const expandSecretReferencesFactory = ({
             referencedProjectSlug = crossProjSlug;
           } else {
             const secretReferenceEnvironment = entities[0];
-            const secretReferencePath = path.join("/", ...entities.slice(1, entities.length - 1));
+            const secretReferencePath = path.posix.join("/", ...entities.slice(1, entities.length - 1));
             const secretReferenceKey = entities[entities.length - 1];
 
             // eslint-disable-next-line no-await-in-loop

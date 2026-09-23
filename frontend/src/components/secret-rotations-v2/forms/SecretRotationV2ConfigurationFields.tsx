@@ -159,7 +159,7 @@ export const SecretRotationV2ConfigurationFields = ({ isUpdate, environments }: 
             auto-rotation may result in service interruptions. If you need to ensure service
             continuity, we recommend disabling this option.{" "}
             <a
-              href="https://sanctum.com/docs/documentation/platform/secret-rotation/overview#how-rotation-works"
+              href="/docs#secrets-management"
               target="_blank"
               rel="noopener noreferrer"
               className="underline underline-offset-2 hover:text-foreground"

@@ -63,7 +63,7 @@ export const Default: Story = {
       <HoverCard {...args}>
         <HoverCardTrigger asChild>
           <a
-            href="https://sanctum.com/docs/documentation/platform/sso/overview"
+            href="/docs"
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1 underline underline-offset-4 hover:text-foreground"

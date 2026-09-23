@@ -26,7 +26,7 @@ const TOOLING_INTEGRATIONS = [
     category: "Tooling",
     description: `Inject secrets into any process or script with the ${envConfig.PLATFORM_NAME} CLI.`,
     icon: faKeyboard,
-    href: "https://sanctum.com/docs/cli/commands/run"
+    href: "/docs#cli"
   },
   {
     name: "SDKs",
@@ -34,7 +34,7 @@ const TOOLING_INTEGRATIONS = [
     category: "Tooling",
     description: `Fetch and manage secrets programmatically with ${envConfig.PLATFORM_NAME}'s language SDKs.`,
     icon: faComputer,
-    href: "https://sanctum.com/docs/sdks/overview"
+    href: "/docs#sdk"
   }
 ];
 

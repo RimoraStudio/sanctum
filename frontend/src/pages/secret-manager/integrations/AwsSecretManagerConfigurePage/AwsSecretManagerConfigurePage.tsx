@@ -242,7 +242,7 @@ export const AwsSecretManagerConfigurePage = () => {
               </div>
               <span className="ml-1.5">AWS Secrets Manager Integration </span>
               <a
-                href="https://sanctum.com/docs/integrations/cloud/aws-secret-manager"
+                href="/docs"
                 target="_blank"
                 rel="noopener noreferrer"
               >

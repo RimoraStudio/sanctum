@@ -1,0 +1,78 @@
+name: sanctum
+
+services:
+  sanctum:
+    build:
+      context: .
+      dockerfile: Dockerfile.standalone-sanctum
+    restart: unless-stopped
+    depends_on:
+      sanctum-db:
+        condition: service_healthy
+      sanctum-redis:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      SITE_URL: $SERVICE_URL_SANCTUM
+      TELEMETRY_ENABLED: "false"
+      OTEL_TELEMETRY_COLLECTION_ENABLED: "false"
+      ENCRYPTION_KEY: $SERVICE_PASSWORD_ENCRYPTIONKEY
+      AUTH_SECRET: $SERVICE_BASE64_AUTHSECRET
+      POSTGRES_USER: sanctum
+      POSTGRES_PASSWORD: $SERVICE_PASSWORD_POSTGRES
+      POSTGRES_DB: sanctum
+      DB_CONNECTION_URI: postgres://sanctum:$SERVICE_PASSWORD_POSTGRES@sanctum-db:5432/sanctum
+      REDIS_URL: redis://sanctum-redis:6379
+      # Optional mail (invites, alerts) — fill in via Coolify env editor
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_FROM_ADDRESS: ${SMTP_FROM_ADDRESS:-}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-Sanctum}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+    networks:
+      - sanctum
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8080/api/status').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  sanctum-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sanctum
+      POSTGRES_PASSWORD: $SERVICE_PASSWORD_POSTGRES
+      POSTGRES_DB: sanctum
+    volumes:
+      - sanctum-pg-data:/var/lib/postgresql/data
+    networks:
+      - sanctum
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sanctum -d sanctum"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  sanctum-redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    volumes:
+      - sanctum-redis-data:/data
+    networks:
+      - sanctum
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  sanctum-pg-data:
+  sanctum-redis-data:
+
+networks:
+  sanctum:

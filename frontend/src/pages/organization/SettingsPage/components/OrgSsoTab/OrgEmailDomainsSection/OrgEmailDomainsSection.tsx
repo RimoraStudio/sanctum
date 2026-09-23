@@ -75,7 +75,7 @@ export const OrgEmailDomainsSection = ({
           <CardTitle>
             <Globe className="size-4 text-accent" />
             Email Domains
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/email-domain" />
+            <DocumentationLinkBadge href="/docs" />
           </CardTitle>
           <CardDescription>Verified domains for your IDP.</CardDescription>
           {hasEmailDomainVerification && (

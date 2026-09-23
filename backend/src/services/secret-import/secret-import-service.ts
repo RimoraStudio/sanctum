@@ -1,4 +1,4 @@
-import path from "node:path";
+﻿import path from "node:path";
 
 import { ForbiddenError, subject } from "@casl/ability";
 
@@ -253,7 +253,7 @@ export const secretImportServiceFactory = ({
             position: lastPos + 2,
             isReserved: true,
             importEnv: folder.environment.id,
-            importPath: path.join(secretPath, getReplicationFolderName(doc.id))
+            importPath: path.posix.join(secretPath, getReplicationFolderName(doc.id))
           },
           tx
         );
@@ -372,7 +372,7 @@ export const secretImportServiceFactory = ({
 
       if (data.position) {
         if (secImp.isReplication) {
-          const replicationFolderPath = path.join(secretPath, getReplicationFolderName(secImp.id));
+          const replicationFolderPath = path.posix.join(secretPath, getReplicationFolderName(secImp.id));
           const reservedImport = await secretImportDAL.findOne({
             folderId: folder.id,
             importEnv: folder.environment.id,
@@ -424,7 +424,7 @@ export const secretImportServiceFactory = ({
           await secretImportDAL.updateAllPosition(folder.id, secImp.position, data.position, 1, tx);
         }
       } else if (secImp.isReplication) {
-        const replicationFolderPath = path.join(secretPath, getReplicationFolderName(secImp.id));
+        const replicationFolderPath = path.posix.join(secretPath, getReplicationFolderName(secImp.id));
         await secretImportDAL.update(
           {
             folderId: folder.id,
@@ -487,7 +487,7 @@ export const secretImportServiceFactory = ({
       const [doc] = await secretImportDAL.delete({ folderId: folder.id, id }, tx);
       if (!doc) throw new NotFoundError({ message: `Secret import with folder ID '${id}' not found` });
       if (doc.isReplication) {
-        const replicationFolderPath = path.join(secretPath, getReplicationFolderName(doc.id));
+        const replicationFolderPath = path.posix.join(secretPath, getReplicationFolderName(doc.id));
         const replicatedFolder = await folderDAL.findBySecretPath(projectId, environment, replicationFolderPath, tx);
         if (replicatedFolder) {
           await secretImportDAL.delete(

@@ -7,7 +7,7 @@ import { Button } from "../../generic/Button";
 import { cn } from "../../utils";
 
 const RBAC_DOCS_URL =
-  "https://sanctum.com/docs/documentation/platform/access-controls/role-based-access-controls";
+  "/docs";
 
 // Fixed widths, not randomized ones, so the backdrop reads as a uniform redaction pattern
 // rather than implying a specific number or shape of records the viewer is missing.

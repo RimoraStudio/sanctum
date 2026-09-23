@@ -509,7 +509,7 @@ export const AccessApprovalRequest = ({
         <CardHeader>
           <CardTitle>
             Access Requests
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/access-controls/access-requests" />
+            <DocumentationLinkBadge href="/docs" />
           </CardTitle>
           <CardDescription>
             Request and review access to secrets in sensitive environments and folders

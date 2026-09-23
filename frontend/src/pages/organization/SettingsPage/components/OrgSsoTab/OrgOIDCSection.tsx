@@ -229,7 +229,7 @@ export const OrgOIDCSection = ({ onSwitchProvider }: Props): JSX.Element => {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="underline underline-offset-2 hover:text-foreground"
-                          href="https://sanctum.com/docs/documentation/platform/sso/overview"
+                          href="/docs"
                         >
                           See your OIDC provider docs for details.
                         </a>

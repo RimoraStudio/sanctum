@@ -15,8 +15,9 @@ Command-line client for the Sanctum secrets platform. Talks to the backend over
 
 ## Invariants — do not break these
 
-- **`sanctum-config.json` never stores credentials.** Project slug, environment,
-  secretPath, imports, profile name only. Credentials live in
+- **`sanctum-config.json` never stores credentials or personal settings.**
+  Project slug, environment, secretPath, imports only — no `profile` field.
+  Credentials and per-project profile bindings (`projectProfiles`) live in
   `~/.sanctum/credentials.json` (mode 0600) or env vars.
 - **Flags are parsed by position.** `takeFlag`/`hasFlag` mutate the args array.
   For `run`, split at `--` first — child-command args must pass through untouched.

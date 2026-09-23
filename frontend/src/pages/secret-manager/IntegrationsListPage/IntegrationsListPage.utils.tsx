@@ -1,17 +1,15 @@
 import { createNotification } from "@app/components/notifications";
 
 export const createIntegrationMissingEnvVarsNotification = (
-  slug: string,
-  type: "cloud" | "cicd" = "cloud",
+  _slug: string,
+  _type: "cloud" | "cicd" = "cloud",
   hashtag?: string
 ) =>
   createNotification({
     type: "error",
     text: (
       <a
-        href={`https://sanctum.com/docs/integrations/${type}/${slug}${
-          hashtag ? `#${hashtag}` : ""
-        }`}
+        href={`/docs${hashtag ? `#${hashtag}` : ""}`}
         target="_blank"
         rel="noreferrer"
         className="underline"

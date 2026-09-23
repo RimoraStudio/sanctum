@@ -166,7 +166,7 @@ export const OrgMembersSection = () => {
         <CardHeader>
           <CardTitle>
             {isSubOrganization ? "Sub-" : ""}Organization Users
-            <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/identities/user-identities" />
+            <DocumentationLinkBadge href="/docs" />
           </CardTitle>
           <CardDescription>
             Invite and manage {isSubOrganization ? "sub-" : ""}organization users

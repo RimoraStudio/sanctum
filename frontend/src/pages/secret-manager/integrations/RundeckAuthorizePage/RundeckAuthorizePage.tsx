@@ -85,7 +85,7 @@ export const RundeckAuthorizePage = () => {
             </div>
             <span className="ml-2.5">Rundeck Integration </span>
             <a
-              href="https://sanctum.com/docs/integrations/cicd/rundeck"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
             >

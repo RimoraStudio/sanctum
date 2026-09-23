@@ -77,7 +77,7 @@ export const GitlabAuthorizePage = () => {
             </div>
             <span className="ml-2.5">GitLab Integration </span>
             <a
-              href="https://sanctum.com/docs/integrations/cicd/gitlab"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
             >

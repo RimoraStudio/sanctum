@@ -56,7 +56,7 @@ export const PersonalTabGroup = ({ selectedTab, onTabChange }: Props) => {
               Existing keys no longer authenticate requests. Use machine identities for programmatic
               access. See the{" "}
               <a
-                href="https://sanctum.com/docs/documentation/platform/identities/overview"
+                href="/docs"
                 target="_blank"
                 rel="noreferrer"
               >

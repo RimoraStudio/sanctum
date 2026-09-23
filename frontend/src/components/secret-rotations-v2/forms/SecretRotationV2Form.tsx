@@ -306,7 +306,7 @@ export const SecretRotationV2Form = ({
                 Step {displayedStepNumber} · {currentStep.rightLabel}
               </p>
               <DocumentationLinkBadge
-                href={`https://sanctum.com/docs/documentation/platform/secret-rotation/${type}`}
+                href={`/docs#secrets-management`}
               />
             </div>
             <p className="mt-4 text-sm font-semibold text-foreground">What this step does</p>

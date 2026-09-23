@@ -186,7 +186,7 @@ export const FolderAccessSheet = ({
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               Manage Permissions
-              <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/access-controls/folder-rbac" />
+              <DocumentationLinkBadge href="/docs" />
             </SheetTitle>
             <div className="mt-2 flex min-w-0 items-center gap-2 text-xs">
               <Badge variant="project" className="shrink-0">

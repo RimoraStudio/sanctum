@@ -127,11 +127,7 @@ Thank you,
 
 export const SANCTUM_SUPPORT_OPTIONS = [
   [Slack, "Support Forum", () => "https://sanctum.com/slack"],
-  [
-    Book,
-    "Read Docs",
-    () => "https://sanctum.com/docs/documentation/getting-started/introduction"
-  ],
+  [Book, "Read Docs", () => "/docs"],
   [Github, "GitHub Issues", () => "https://github.com/Sanctum/sanctum/issues"],
   [Mail, "Email Support", getFormattedSupportEmailLink],
   [Users, "Instance Admins", () => "server-admins"]
@@ -732,15 +728,10 @@ export const Navbar = () => {
             </OrgPermissionCan>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <a
-                href="https://sanctum.com/docs/documentation/getting-started/introduction"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <Link to="/docs">
                 <Book />
                 Documentation
-                <ExternalLink className="ml-auto size-3.5 opacity-50" />
-              </a>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <a href="https://sanctum.com/slack" target="_blank" rel="noopener noreferrer">

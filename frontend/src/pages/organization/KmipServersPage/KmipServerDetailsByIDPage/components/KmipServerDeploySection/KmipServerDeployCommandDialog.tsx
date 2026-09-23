@@ -134,7 +134,7 @@ export const KmipServerDeployCommandDialog = ({
           </TabPanel>
         </Tabs>
         <a
-          href="https://sanctum.com/docs/cli/overview"
+          href="/docs#cli"
           target="_blank"
           rel="noreferrer"
           className="mt-2 flex h-4 w-fit items-center gap-2 border-b border-mineshaft-400 text-sm text-mineshaft-400 transition-colors hover:border-yellow-400 hover:text-yellow-400"

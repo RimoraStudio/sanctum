@@ -129,7 +129,7 @@ export const HerokuConfigurePage = () => {
             </div>
             <span className="ml-2">Heroku Integration </span>
             <a
-              href="https://sanctum.com/docs/integrations/cloud/heroku"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
             >

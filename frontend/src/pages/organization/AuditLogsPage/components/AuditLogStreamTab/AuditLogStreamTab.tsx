@@ -36,7 +36,7 @@ export const AuditLogStreamsTab = withPermission(
           <CardHeader>
             <CardTitle>
               Audit Log Streams
-              <DocumentationLinkBadge href="https://sanctum.com/docs/documentation/platform/audit-log-streams/audit-log-streams" />
+              <DocumentationLinkBadge href="/docs" />
             </CardTitle>
             <CardDescription>
               Send audit logs from {envConfig.PLATFORM_NAME} to external logging providers via HTTP

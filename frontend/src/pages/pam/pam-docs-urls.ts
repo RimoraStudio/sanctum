@@ -2,7 +2,7 @@
  * Centralized PAM documentation URLs.
  */
 
-const PAM_DOCS_BASE_URL = "https://sanctum.com/docs/documentation/platform/pam";
+const PAM_DOCS_BASE_URL = "/docs#pam";
 
 export const PamDocsUrls = {
   // Overview

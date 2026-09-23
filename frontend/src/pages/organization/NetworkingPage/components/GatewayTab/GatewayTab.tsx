@@ -174,8 +174,8 @@ export const GatewayTab = withPermission(
             <DocumentationLinkBadge
               href={
                 activeSubTab === "gateway-pools"
-                  ? "https://sanctum.com/docs/documentation/platform/gateways/gateway-pools"
-                  : "https://sanctum.com/docs/documentation/platform/gateways/overview"
+                  ? "/docs"
+                  : "/docs"
               }
             />
           </CardTitle>

@@ -117,7 +117,7 @@ export const FlyioConfigurePage = () => {
             </div>
             <span className="ml-2.5">Fly.io Integration </span>
             <a
-              href="https://sanctum.com/docs/integrations/cloud/flyio"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
             >

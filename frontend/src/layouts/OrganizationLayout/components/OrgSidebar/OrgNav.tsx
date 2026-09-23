@@ -1,7 +1,18 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { Blocks, CreditCard, FileText, Settings, Shield } from "lucide-react";
+import {
+  Blocks,
+  CreditCard,
+  FileKey,
+  FileText,
+  Key,
+  KeyRound,
+  ScanSearch,
+  Settings,
+  Shield,
+  ShieldCheck
+} from "lucide-react";
 
 import { OrgIcon, SidebarCollapsibleGroup, SubOrgIcon } from "@app/components/v3";
 import {
@@ -68,6 +79,41 @@ export const OrgNav = () => {
           pathSuffix: "integrations",
           // Keep highlighted on the app-connections OAuth/manifest callback pages
           activeMatch: /organizations\/[^/]+\/app-connections/
+        }
+      ]
+    },
+    {
+      label: "Products",
+      items: [
+        {
+          label: "Secrets Management",
+          icon: KeyRound,
+          pathSuffix: "projects/secret-management",
+          activeMatch: /organizations\/[^/]+\/projects\/secret-management\//
+        },
+        {
+          label: "Certificate Manager",
+          icon: FileKey,
+          pathSuffix: "projects/cert-manager",
+          activeMatch: /organizations\/[^/]+\/projects\/cert-manager\//
+        },
+        {
+          label: "KMS",
+          icon: Key,
+          pathSuffix: "projects/kms",
+          activeMatch: /organizations\/[^/]+\/projects\/kms\//
+        },
+        {
+          label: "Secret Scanning",
+          icon: ScanSearch,
+          pathSuffix: "projects/secret-scanning",
+          activeMatch: /organizations\/[^/]+\/projects\/secret-scanning\//
+        },
+        {
+          label: "PAM",
+          icon: ShieldCheck,
+          pathSuffix: "pam",
+          activeMatch: /organizations\/[^/]+\/pam\//
         }
       ]
     },
