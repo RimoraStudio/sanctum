@@ -11,9 +11,9 @@ simpler developer experience and a purpose-built CLI. See [NOTICE](./NOTICE).
 - **Dashboard** — projects, environments, secret paths, versioning, secret syncs
 - **Machine identities** — Universal Auth (clientId/secret) plus platform
   attestation methods (Kubernetes, AWS, GCP, Azure, OIDC, JWT, TLS, SPIFFE, LDAP)
-- **`@sanctum/cli`** — link a repo folder to a project, pull/push/diff `.env`
+- **`sanctum-cli`** (`packages/cli`) — link a repo folder to a project, pull/push/diff `.env`
   files, and `sanctum run` to inject secrets at launch. No `.env` needed on disk
-- **`@sanctum/sdk`** — TypeScript SDK wrapping the REST API (auth, projects,
+- **`sanctum-sdk`** (`packages/sdk`) — TypeScript SDK wrapping the REST API (auth, projects,
   secrets, dotenv utils)
 
 ## Quickstart (local dev)
@@ -52,7 +52,7 @@ sanctum push .env --dry-run      # preview changes, no writes
 sanctum run -- npm run dev       # inject secrets as env vars
 ```
 
-` sanctum-config.json ` is committed (project/env/path only). Credentials live in
+`sanctum-config.json` is committed (project/env/path only). Credentials live in
 `~/.sanctum/credentials.json` per profile, or `SANCTUM_CLIENT_ID` +
 `SANCTUM_CLIENT_SECRET` in CI. See [packages/cli](./packages/cli) for the full
 command reference and [packages/cli/DEMO.md](./packages/cli/DEMO.md) for a

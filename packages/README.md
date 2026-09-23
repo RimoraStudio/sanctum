@@ -1,11 +1,11 @@
 # Packages
 
-The CLI and SDK were split into their own repositories:
-
-| Package | Repository | npm |
+| Package | npm | Purpose |
 | --- | --- | --- |
-| `sanctum-cli` | [github.com/neang-mengseang/sanctum-cli](https://github.com/neang-mengseang/sanctum-cli) | `npm i -g sanctum-cli` |
-| `sanctum-sdk` | [github.com/neang-mengseang/sanctum-sdk](https://github.com/neang-mengseang/sanctum-sdk) | `npm i sanctum-sdk` |
+| [`sdk/`](./sdk) | `sanctum-sdk` | TypeScript SDK for the Sanctum REST API |
+| [`cli/`](./cli) | `sanctum-cli` | Terminal client (`sanctum`), built on the SDK |
 
-Both are MIT licensed and publish independently via tag-triggered GitHub
-Actions workflows in each repo.
+The CLI consumes the SDK via `file:../sdk` for local dev; the publish workflow
+(`.github/workflows/publish.yml`) rewrites it to the released version at
+release time. Build order: SDK first, then CLI.
+
