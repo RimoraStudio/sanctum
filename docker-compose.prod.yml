@@ -14,7 +14,7 @@ services:
     pull_policy: missing
     env_file: .env
     ports:
-      - 80:8080
+      - ${SANCTUM_HTTP_PORT:-8080}:8080
     environment:
       - NODE_ENV=production
       - DB_CONNECTION_URI=${DB_CONNECTION_URI:-postgres://sanctum:sanctum@db:5432/sanctum}
