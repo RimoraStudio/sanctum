@@ -23,12 +23,16 @@ jobs:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
 
+      - name: Upgrade npm for OIDC trusted publishing
+        run: npm install -g npm@latest
+
       - name: Build + publish SDK
         working-directory: packages/sdk
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           npm ci
+          npm run build
           npm publish --access public --provenance
 
       - name: Point CLI at published SDK
@@ -41,6 +45,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           npm install
+          npm run build
           npm publish --access public --provenance
 
   image:
