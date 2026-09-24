@@ -805,6 +805,9 @@ with real values.
 
 Never rely on interactive prompts. Everything is flag- or env-driven:
 
+- One-shot setup: \`sanctum setup --project <slug> --env dev --path /apps/api\` runs
+  login + init + AGENTS.md in one pass. Add \`--all-envs\` to provision the path in
+  every environment.
 - Credentials: \`SANCTUM_BASE_URL\` + \`SANCTUM_TOKEN\`, or \`SANCTUM_CLIENT_ID\` +
   \`SANCTUM_CLIENT_SECRET\` (Universal Auth machine identity). If none exist, stop and
   ask the user for credentials. Do not invent tokens.
@@ -855,6 +858,41 @@ approved in the web UI. Tell the user when this happens. \`secrets set\` and
 \`push\` surface it; reads and diffs are never queued.
 `;
 
+const pickFlags = (args: string[], names: string[]): string[] => {
+  const out: string[] = [];
+  for (const n of names) {
+    const v = takeFlag(args, n);
+    if (v !== undefined) out.push(n, v);
+  }
+  return out;
+};
+
+/** One-shot onboarding: login (if needed) + init + optional all-envs provisioning + AGENTS.md. */
+const cmdSetup = async (args: string[]) => {
+  const allEnvs = hasFlag(args, "--all-envs");
+  const skipAgents = hasFlag(args, "--no-agents");
+  const profile = takeFlag(args, "--profile");
+  const profileArgs = profile ? ["--profile", profile] : [];
+
+  const loginArgs = [...pickFlags(args, ["--base-url", "--token", "--client-id", "--client-secret"]), ...profileArgs];
+  const hasCredFlags = loginArgs.some((a) => a === "--token" || a === "--client-id");
+
+  if (hasCredFlags || !loadCredentials(profile)) {
+    await cmdLogin(loginArgs);
+  } else {
+    console.log(`Using existing profile "${profile ?? process.env.SANCTUM_PROFILE ?? "default"}".`);
+  }
+
+  await cmdInit([...args, ...profileArgs]);
+
+  if (allEnvs) {
+    const config = resolveConfig();
+    await cmdFolders(["create", config.secretPath ?? "/", "--all-envs", ...profileArgs]);
+  }
+
+  if (!skipAgents) cmdAgents([]);
+};
+
 const cmdAgents = (args: string[]) => {
   const force = hasFlag(args, "--force");
   const target = join(process.cwd(), "AGENTS.md");
@@ -875,6 +913,9 @@ const cmdAgents = (args: string[]) => {
 const HELP = `sanctum â€” CLI for the Sanctum secrets platform
 
 Usage:
+  sanctum setup                                    one-shot: login + init + AGENTS.md
+              [--base-url x] [--token|--client-id/--client-secret] [--project x] [--env x] [--path /x]
+              [--all-envs] [--no-agents] [--profile name]
   sanctum login --token <token> | --client-id <id> --client-secret <secret> [--base-url <url>] [--profile name]
   sanctum profiles                                   list saved credential profiles
   sanctum profiles use                               pick which profile this project uses (local-only)
@@ -906,6 +947,7 @@ const main = async () => {
   try {
     switch (cmd) {
       case "login": return await cmdLogin(args);
+      case "setup": return await cmdSetup(args);
       case "profiles": return await cmdProfiles(args);
       case "init": return await cmdInit(args);
       case "projects": return await cmdProjects(args);
