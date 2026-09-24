@@ -36,7 +36,7 @@ jobs:
         run: |
           npm ci
           npm run build
-          npm publish --access public --provenance
+          npm publish --access public --provenance --loglevel=verbose
 
       - name: Point CLI at published SDK
         working-directory: packages/cli
