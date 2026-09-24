@@ -46,6 +46,11 @@ services:
       resources:
         limits:
           memory: 192M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     logging:
       options:
         max-size: "5m"

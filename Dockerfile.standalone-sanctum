@@ -83,7 +83,7 @@ COPY backend/package*.json ./
 RUN npm ci
 
 COPY /backend .
-COPY --chown=non-root-user:nodejs standalone-entrypoint.sh standalone-entrypoint.sh
+COPY --chown=non-root-user:nodejs --chmod=755 standalone-entrypoint.sh standalone-entrypoint.sh
 RUN npm i -g tsconfig-paths
 ENV NODE_OPTIONS="--max-old-space-size=8192"
 RUN npm run build
