@@ -788,36 +788,85 @@ const cmdEnvFile = async (args: string[]) => {
 const AGENTS_SNIPPET = `
 ## Secrets management (Sanctum)
 
-This project uses the Sanctum CLI for secrets â€” do NOT create or commit .env files
+This project uses the Sanctum CLI for secrets. Do NOT create or commit .env files
 with real values.
 
 - \`sanctum-config.json\` links this directory to a Sanctum project/environment/secret
   path. It is committed and contains no secrets.
-- Run the app with \`sanctum run -- <command>\` (e.g. \`sanctum run -- npm run dev\`) â€”
-  secrets are injected as env vars at launch.
-- \`sanctum secrets list\` / \`get <KEY>\` / \`set <KEY>=<v>\` read and write remote secrets.
-- \`sanctum diff\` compares a local file against remote; \`sanctum push\` uploads with a
-  preview. Never paste secret values into chat, commits, or docs.
+- Run the app with \`sanctum run -- <command>\` (e.g. \`sanctum run -- npm run dev\`).
+  Secrets are injected as env vars at launch.
+- \`sanctum secrets list\` / \`get <KEY>\` / \`set <KEY>=<v>\` / \`rm <KEY>\` read and
+  write remote secrets.
+- \`sanctum diff\` compares a local file against remote, \`sanctum pull\` writes remote
+  secrets into a local file, \`sanctum push\` uploads a local file's keys with a preview.
+- Never paste secret values into chat, commits, or docs.
 
 ### Agent setup (non-interactive)
 
-All commands accept flags/env vars â€” never rely on interactive prompts:
+Never rely on interactive prompts. Everything is flag- or env-driven:
 
-- Credentials: set \`SANCTUM_BASE_URL\` + \`SANCTUM_TOKEN\`, or \`SANCTUM_CLIENT_ID\` +
-  \`SANCTUM_CLIENT_SECRET\` (Universal Auth machine identity).
-- Link a project: \`sanctum init --project <slug> --env dev --path /apps/api\` â€”
-  creates the remote folder path automatically when credentials are present.
-- Provision paths for all environments: \`sanctum folders create /apps/api --all-envs\`.
-- If a command fails with "Not logged in", stop and ask the user for credentials â€”
-  do not invent tokens.
+- Credentials: \`SANCTUM_BASE_URL\` + \`SANCTUM_TOKEN\`, or \`SANCTUM_CLIENT_ID\` +
+  \`SANCTUM_CLIENT_SECRET\` (Universal Auth machine identity). If none exist, stop and
+  ask the user for credentials. Do not invent tokens.
+- Link a project: \`sanctum init --project <slug> --env dev --path /apps/api\`.
+  Writes \`sanctum-config.json\` and auto-creates the remote folder path when
+  credentials are present.
+- Provision paths upfront: \`sanctum folders create /apps/api --all-envs\` covers every
+  environment at once. Nested paths (\`/a/b/c\`) work and are idempotent.
+- Inspect state: \`sanctum status\` prints the resolved config (project, env, merged
+  paths). \`sanctum whoami\` prints the active profile, instance URL, and token expiry.
+- Overrides: \`--env staging\` works on secrets/diff/pull/push/run/folders.
+  \`--path /other\` works on secrets commands. \`--profile name\` selects credentials.
+
+### Monorepo layout
+
+- Each sub-app gets its own \`sanctum-config.json\`. Running \`sanctum init\` inside a
+  child dir auto-registers it in the root config's \`projects\` map.
+- Configs merge root to leaf. Ancestor \`secretPath\` and \`imports\` act as shared
+  secrets. The leaf path wins on key conflicts.
+- \`imports: ["/shared"]\` in a config pulls an extra remote path into the merge.
+- \`sanctum pull --all\` / \`sanctum diff --all\` iterate every registered child.
+- A single root config can hold inline projects instead:
+  \`"projects": {"apps/api": {"projectSlug": "...", "secretPath": "/apps/api"}}\`.
+
+### Notes
+
+- Secret paths are folders on the server. Writes auto-create the configured path, so
+  \`sanctum push\` and \`secrets set\` just work. Use \`folders create\` only to
+  provision paths ahead of time or across environments.
+- Environment values are slugs (\`dev\`, \`staging\`, \`prod\`), not display names.
+- Secret values are masked in \`diff\` output unless \`--values\` is passed. Keep them masked.
+- Profiles are personal and live in \`~/.sanctum/credentials.json\`. Never write
+  profile names or credentials into \`sanctum-config.json\`.
+
+### When a tool needs a real .env file
+
+Some tools read a file, not process env (Prisma CLI, some Docker setups). Use
+\`sanctum pull .env\` or \`sanctum export --out .env\` to materialize one locally,
+add \`.env\` to \`.gitignore\`, and treat it as disposable. Pull again to refresh.
+Never commit it. \`sanctum run -- <cmd>\` remains preferred whenever the tool
+honors process env.
+
+### Write approvals
+
+A write can return \`queued for approval\` instead of landing, when the project
+has a change-approval policy on that env/path. The secret is NOT live until
+approved in the web UI. Tell the user when this happens. \`secrets set\` and
+\`push\` surface it; reads and diffs are never queued.
 `;
 
-const cmdAgents = () => {
+const cmdAgents = (args: string[]) => {
+  const force = hasFlag(args, "--force");
   const target = join(process.cwd(), "AGENTS.md");
-  const existing = existsSync(target) ? readFileSync(target, "utf8") : "";
+  let existing = existsSync(target) ? readFileSync(target, "utf8") : "";
   if (existing.includes("Secrets management (Sanctum)")) {
-    console.log("AGENTS.md already has a Sanctum section.");
-    return;
+    if (!force) {
+      console.log("AGENTS.md already has a Sanctum section. Use --force to replace it.");
+      return;
+    }
+    const start = existing.indexOf("## Secrets management (Sanctum)");
+    const next = existing.indexOf("\n## ", start + 1);
+    existing = (next === -1 ? existing.slice(0, start) : existing.slice(0, start) + existing.slice(next)).trimEnd() + "\n";
   }
   writeFileSync(target, existing.trimEnd() + "\n" + AGENTS_SNIPPET);
   console.log(`Appended Sanctum section to ${target}`);
@@ -861,7 +910,7 @@ const main = async () => {
       case "init": return await cmdInit(args);
       case "projects": return await cmdProjects(args);
       case "status": return cmdStatus();
-      case "agents": return cmdAgents();
+      case "agents": return cmdAgents(args);
       case "envs": return await cmdEnvs(args);
       case "folders": return await cmdFolders(args);
       case "secrets": return await cmdSecrets(args);
