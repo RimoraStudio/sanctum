@@ -23,11 +23,21 @@ services:
       resources:
         limits:
           memory: ${SANCTUM_MEM_LIMIT:-1G}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8080/api/status').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - sanctum
 
   redis:
-    image: redis
+    image: redis:7-alpine
     container_name: sanctum-dev-redis
     env_file: .env
     restart: always
@@ -38,6 +48,10 @@ services:
       resources:
         limits:
           memory: 192M
+    logging:
+      options:
+        max-size: "5m"
+        max-file: "2"
     networks:
       - sanctum
     volumes:
@@ -52,10 +66,15 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:-sanctum}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-sanctum}
       - POSTGRES_DB=${POSTGRES_DB:-sanctum}
+    command: ["postgres", "-c", "shared_buffers=128MB", "-c", "work_mem=8MB", "-c", "max_connections=50"]
     deploy:
       resources:
         limits:
           memory: 512M
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
     volumes:
       - pg_data:/var/lib/postgresql/data
     networks:
