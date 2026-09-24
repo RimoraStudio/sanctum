@@ -1,6 +1,7 @@
 ﻿#!/usr/bin/env node
-import { spawn } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { createServer } from "node:http";
 import { createRequire } from "node:module";
 import { basename, dirname, join } from "node:path";
 
@@ -132,6 +133,57 @@ const ensureRemotePath = async (sdk: SanctumSdk, config: ResolvedConfig, env?: s
   } catch { /* folder creation needs write permission; the write itself reports real errors */ }
 };
 
+const openBrowser = (url: string) => {
+  const [cmd, cmdArgs] =
+    process.platform === "win32"
+      ? ["cmd", ["/c", "start", "", url]]
+      : process.platform === "darwin"
+        ? ["open", [url]]
+        : ["xdg-open", [url]];
+  execFile(cmd, cmdArgs, () => {});
+};
+
+/** Browser login: listen on 127.0.0.1, web UI POSTs {JTWToken} back via ?callback_port. */
+const browserLogin = (baseUrl: string) =>
+  new Promise<{ JTWToken?: string; email?: string }>((resolve, reject) => {
+    const server = createServer((req, res) => {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+      if (req.method === "OPTIONS") {
+        res.writeHead(204);
+        return void res.end();
+      }
+      if (req.method !== "POST") {
+        res.writeHead(404);
+        return void res.end();
+      }
+      let body = "";
+      req.on("data", (c: Buffer) => (body += c));
+      req.on("end", () => {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end("{}");
+        clearTimeout(timeout);
+        server.close();
+        try {
+          resolve(JSON.parse(body) as { JTWToken?: string; email?: string });
+        } catch {
+          reject(new Error("Bad login payload"));
+        }
+      });
+    });
+    const timeout = setTimeout(() => {
+      server.close();
+      reject(new Error("Browser login timed out"));
+    }, 180_000);
+    server.listen(0, "127.0.0.1", () => {
+      const { port } = server.address() as { port: number };
+      const url = `${baseUrl}/login?callback_port=${port}`;
+      console.log(`Opening ${url}\nComplete login in the browser...`);
+      openBrowser(url);
+    });
+  });
+
 // ---------- commands ----------
 
 const cmdLogin = async (args: string[]) => {
@@ -140,10 +192,11 @@ const cmdLogin = async (args: string[]) => {
   let clientId = takeFlag(args, "--client-id");
   let clientSecret = takeFlag(args, "--client-secret");
   let profile = takeFlag(args, "--profile");
+  const browser = hasFlag(args, "--browser");
 
   if (!token && !(clientId && clientSecret)) {
     if (!process.stdin.isTTY) {
-      die("Provide --token, or --client-id + --client-secret.");
+      die("Provide --token, --client-id + --client-secret, or --browser.");
     }
 
     const step = (n: number, total: number, label: string) =>
@@ -153,13 +206,21 @@ const cmdLogin = async (args: string[]) => {
     baseUrl = baseUrl ?? (await input("URL", "http://localhost:4000"));
 
     step(2, 4, "Login method");
-    const method = await select("How do you want to log in?", [
-      { label: "Machine identity", value: "ua", hint: "clientId + clientSecret â€” recommended for dev/CI" },
-      { label: "Access token", value: "token", hint: "paste a user or identity token" }
-    ]);
+    const method = browser
+      ? "browser"
+      : await select("How do you want to log in?", [
+          { label: "Browser", value: "browser", hint: "opens the web UI, token comes back automatically" },
+          { label: "Machine identity", value: "ua", hint: "clientId + clientSecret, recommended for dev/CI" },
+          { label: "Access token", value: "token", hint: "paste a user or identity token" }
+        ]);
 
     step(3, 4, "Credentials");
-    if (method === "ua") {
+    if (method === "browser") {
+      const { JTWToken, email } = await browserLogin(baseUrl);
+      if (!JTWToken) die("Browser login did not return a token.");
+      token = JTWToken;
+      if (email) console.log(`Authenticated as ${email}.`);
+    } else if (method === "ua") {
       clientId = await input("Client ID");
       clientSecret = await password("Client secret");
     } else {
@@ -880,7 +941,8 @@ is \`sanctum-cli\` (install: \`npm i -g sanctum-cli\`), NOT \`sanctum\` (unrelat
   every environment.
 - Credentials: \`SANCTUM_BASE_URL\` + \`SANCTUM_TOKEN\`, or \`SANCTUM_CLIENT_ID\` +
   \`SANCTUM_CLIENT_SECRET\` (Universal Auth machine identity). If none exist, stop and
-  ask the user for credentials. Do not invent tokens.
+  ask the user for credentials. Do not invent tokens. Interactive users can run
+  \`sanctum login --browser\` to auth through the web UI.
 - Link a project: \`sanctum init --project <slug> --env dev --path /apps/api\`.
   Writes \`sanctum-config.json\` and auto-creates the remote folder path when
   credentials are present.
@@ -948,7 +1010,12 @@ const cmdSetup = async (args: string[]) => {
   const profile = takeFlag(args, "--profile");
   const profileArgs = profile ? ["--profile", profile] : [];
 
-  const loginArgs = [...pickFlags(args, ["--base-url", "--token", "--client-id", "--client-secret"]), ...profileArgs];
+  const browser = hasFlag(args, "--browser");
+  const loginArgs = [
+    ...pickFlags(args, ["--base-url", "--token", "--client-id", "--client-secret"]),
+    ...(browser ? ["--browser"] : []),
+    ...profileArgs
+  ];
   const hasCredFlags = loginArgs.some((a) => a === "--token" || a === "--client-id");
 
   if (hasCredFlags || !loadCredentials(profile)) {
@@ -990,9 +1057,10 @@ const HELP = `sanctum â€” CLI for the Sanctum secrets platform
 
 Usage:
   sanctum setup                                    one-shot: login + init + AGENTS.md
-              [--base-url x] [--token|--client-id/--client-secret] [--project x] [--env x] [--path /x]
+              [--base-url x] [--browser|--token|--client-id/--client-secret] [--project x] [--env x] [--path /x]
               [--all-envs] [--no-agents] [--profile name]
-  sanctum login --token <token> | --client-id <id> --client-secret <secret> [--base-url <url>] [--profile name]
+  sanctum login [--browser] | --token <token> | --client-id <id> --client-secret <secret>
+              [--base-url <url>] [--profile name]    (--browser opens the web UI and catches the token)
   sanctum profiles                                   list saved credential profiles
   sanctum profiles use                               pick which profile this project uses (local-only)
   sanctum init [--project <id-or-slug>] [--env dev] [--path /apps/api] [--imports /shared] [--profile name]
