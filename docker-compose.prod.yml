@@ -8,10 +8,7 @@ services:
       redis:
         condition: service_started
     image: ghcr.io/rimorastudio/sanctum:latest # PIN THIS TO A SPECIFIC TAG
-    build:
-      context: .
-      dockerfile: Dockerfile.standalone-sanctum
-    pull_policy: missing
+    pull_policy: always
     env_file: .env
     ports:
       - ${SANCTUM_HTTP_PORT:-8080}:8080
