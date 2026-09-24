@@ -1,6 +1,6 @@
 {
   "name": "sanctum-cli",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Command-line client for the Sanctum secrets platform",
   "license": "MIT",
   "repository": {

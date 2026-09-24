@@ -63,11 +63,9 @@ const hasFlag = (args: string[], name: string): boolean => {
   return true;
 };
 
-const getClient = async (profile?: string): Promise<SanctumSdk> => {
+const getClientIfAvailable = async (profile?: string): Promise<SanctumSdk | null> => {
   const credentials = loadCredentials(profile);
-  if (!credentials) {
-    return die("Not logged in. Run `sanctum login`, or set SANCTUM_TOKEN / SANCTUM_CLIENT_ID + SANCTUM_CLIENT_SECRET.");
-  }
+  if (!credentials) return null;
 
   const sdk = new SanctumSdk({
     baseUrl: credentials.baseUrl,
@@ -78,6 +76,14 @@ const getClient = async (profile?: string): Promise<SanctumSdk> => {
 
   if (!sdk.accessToken) {
     await sdk.authenticate();
+  }
+  return sdk;
+};
+
+const getClient = async (profile?: string): Promise<SanctumSdk> => {
+  const sdk = await getClientIfAvailable(profile);
+  if (!sdk) {
+    return die("Not logged in. Run `sanctum login`, or set SANCTUM_TOKEN / SANCTUM_CLIENT_ID + SANCTUM_CLIENT_SECRET.");
   }
   return sdk;
 };
@@ -110,6 +116,20 @@ const fetchMergedSecrets = async (
     for (const s of secrets) merged[s.secretKey] = s.secretValue ?? "";
   }
   return merged;
+};
+
+/** Create the configured secretPath remotely if missing. Best-effort: the real write surfaces any actual error. */
+const ensureRemotePath = async (sdk: SanctumSdk, config: ResolvedConfig, env?: string) => {
+  const secretPath = config.secretPath ?? "/";
+  if (secretPath === "/") return;
+  try {
+    await sdk.folders.ensurePath({
+      projectId: config.projectId,
+      projectSlug: config.projectSlug,
+      environment: env ?? config.environment ?? "dev",
+      path: secretPath
+    });
+  } catch { /* folder creation needs write permission; the write itself reports real errors */ }
 };
 
 // ---------- commands ----------
@@ -246,10 +266,29 @@ const cmdInit = async (args: string[]) => {
     }
 
     if (!secretPath) secretPath = await input("Secret path", "/");
+
+    if (secretPath !== "/") {
+      const scope = project.includes("-") && project.length > 20 ? { projectId: project } : { projectSlug: project };
+      try {
+        await sdk.folders.ensurePath({ ...scope, environment, path: secretPath });
+        console.log(`Ensured remote path ${environment}:${secretPath}`);
+      } catch { /* remote folder creation is best-effort at init time */ }
+    }
   }
 
   if (!project || !environment || !secretPath) {
     return die("Usage: sanctum init --project <id-or-slug> [--env dev] [--path /apps/api] [--imports /shared] [--profile name]");
+  }
+
+  // non-interactive path: provision the remote folder if credentials are available (CI/agents)
+  if (!interactive && secretPath !== "/") {
+    try {
+      const sdk = await getClientIfAvailable(profile);
+      if (!sdk) throw new Error("no credentials");
+      const scope = project.includes("-") && project.length > 20 ? { projectId: project } : { projectSlug: project };
+      await sdk.folders.ensurePath({ ...scope, environment, path: secretPath });
+      console.log(`Ensured remote path ${environment}:${secretPath}`);
+    } catch { /* no credentials or no permission — init still writes config */ }
   }
 
   const config = {
@@ -398,6 +437,7 @@ const cmdSecrets = async (args: string[]) => {
       if (!pair?.includes("=")) die("Usage: sanctum secrets set <KEY>=<value>");
       const [key, ...rest] = pair.split("=");
       const value = rest.join("=");
+      await ensureRemotePath(sdk, config, env);
       const result = await upsertSecret(sdk, key, value, scope());
       if (result.approval) console.log(`${yellow("?")} ${key} queued for approval${result.approval.slug ? ` (${result.approval.slug})` : ""}`);
       else ok(`${result.verb} ${key}`);
@@ -414,6 +454,45 @@ const cmdSecrets = async (args: string[]) => {
     }
     default:
       die("Usage: sanctum secrets <list|get|set|rm>");
+  }
+};
+
+const cmdFolders = async (args: string[]) => {
+  const sub = args.shift();
+  const env = takeFlag(args, "--env");
+  const pathFlag = takeFlag(args, "--path");
+  const allEnvs = hasFlag(args, "--all-envs");
+  const config = resolveConfig();
+  const profile = takeFlag(args, "--profile") ?? getProjectProfile(config.projectSlug);
+  const sdk = await getClient(profile);
+  const scope = { projectId: config.projectId, projectSlug: config.projectSlug };
+
+  switch (sub) {
+    case "create": {
+      const target = args[0] ?? pathFlag;
+      if (!target) return die("Usage: sanctum folders create <path> [--env x] [--all-envs]");
+      const envs = allEnvs
+        ? (await sdk.projects.listEnvironments(
+            config.projectId ?? (await sdk.projects.getBySlug(config.projectSlug!)).id
+          )).environments.map((e) => e.slug)
+        : [env ?? config.environment ?? "dev"];
+      for (const e of envs) {
+        await sdk.folders.ensurePath({ ...scope, environment: e, path: target });
+        ok(`${e}: ${target}`);
+      }
+      break;
+    }
+    case "list": {
+      const { folders } = await sdk.folders.list({
+        ...scope,
+        environment: env ?? config.environment ?? "dev",
+        path: pathFlag ?? "/"
+      });
+      for (const f of folders) console.log(f.relativePath ?? f.name);
+      break;
+    }
+    default:
+      die("Usage: sanctum folders <create <path>|list> [--env x] [--all-envs] [--path /x]");
   }
 };
 
@@ -658,6 +737,7 @@ const cmdEnvFile = async (args: string[]) => {
   const config = resolveConfig();
   const profile = takeFlag(args, "--profile") ?? getProjectProfile(config.projectSlug);
   const sdk = await getClient(profile);
+  await ensureRemotePath(sdk, config, env);
   const values = sdk.dotenv.parseDotenv(readFileSync(file, "utf8"));
   const keys = Object.keys(values);
   if (!keys.length) die(`No KEY=value pairs found in ${file}. Nothing to push.`);
@@ -718,6 +798,18 @@ with real values.
 - \`sanctum secrets list\` / \`get <KEY>\` / \`set <KEY>=<v>\` read and write remote secrets.
 - \`sanctum diff\` compares a local file against remote; \`sanctum push\` uploads with a
   preview. Never paste secret values into chat, commits, or docs.
+
+### Agent setup (non-interactive)
+
+All commands accept flags/env vars â€” never rely on interactive prompts:
+
+- Credentials: set \`SANCTUM_BASE_URL\` + \`SANCTUM_TOKEN\`, or \`SANCTUM_CLIENT_ID\` +
+  \`SANCTUM_CLIENT_SECRET\` (Universal Auth machine identity).
+- Link a project: \`sanctum init --project <slug> --env dev --path /apps/api\` â€”
+  creates the remote folder path automatically when credentials are present.
+- Provision paths for all environments: \`sanctum folders create /apps/api --all-envs\`.
+- If a command fails with "Not logged in", stop and ask the user for credentials â€”
+  do not invent tokens.
 `;
 
 const cmdAgents = () => {
@@ -743,6 +835,8 @@ Usage:
   sanctum status                                    show resolved config + linked monorepo projects
   sanctum agents                                    add a Sanctum usage section to ./AGENTS.md
   sanctum envs
+  sanctum folders create <path> [--env x] [--all-envs]  create a secret path (nested ok, idempotent)
+  sanctum folders list [--env x] [--path /x]
   sanctum secrets list|get <KEY>|set <KEY>=<value>|rm <KEY> [--env x] [--path /x] [--profile name]
   sanctum export [--env x] [--format dotenv|json] [--out file]
   sanctum diff [file] [--env x] [--values] [--all]  compare local .env against remote secrets
@@ -769,6 +863,7 @@ const main = async () => {
       case "status": return cmdStatus();
       case "agents": return cmdAgents();
       case "envs": return await cmdEnvs(args);
+      case "folders": return await cmdFolders(args);
       case "secrets": return await cmdSecrets(args);
       case "export": return await cmdExport(args);
       case "diff": return await cmdDiff(args);
