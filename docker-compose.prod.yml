@@ -39,7 +39,7 @@ services:
     container_name: sanctum-dev-redis
     env_file: .env
     restart: always
-    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "128mb", "--maxmemory-policy", "noeviction"]
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     deploy:
