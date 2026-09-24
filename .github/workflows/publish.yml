@@ -36,7 +36,11 @@ jobs:
         run: |
           npm ci
           npm run build
-          npm publish --access public --provenance --loglevel=verbose
+          if npm view "$(node -p "require('./package.json').name + '@' + require('./package.json').version")" version; then
+            echo "already published, skipping"
+          else
+            npm publish --access public --provenance
+          fi
 
       - name: Point CLI at published SDK
         working-directory: packages/cli
@@ -47,7 +51,11 @@ jobs:
         run: |
           npm install
           npm run build
-          npm publish --access public --provenance
+          if npm view "$(node -p "require('./package.json').name + '@' + require('./package.json').version")" version; then
+            echo "already published, skipping"
+          else
+            npm publish --access public --provenance
+          fi
 
   image:
     runs-on: ubuntu-latest
