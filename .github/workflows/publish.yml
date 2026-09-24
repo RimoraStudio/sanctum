@@ -27,6 +27,8 @@ jobs:
 
       - name: Build + publish SDK
         working-directory: packages/sdk
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           npm ci
           npm run build
@@ -38,6 +40,8 @@ jobs:
 
       - name: Build + publish CLI
         working-directory: packages/cli
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           npm install
           npm run build
