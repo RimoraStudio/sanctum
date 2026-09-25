@@ -248,6 +248,7 @@ import {
   ResourceCount,
   ResourceFilter,
   ResourceSearchInput,
+  SecretFilesSection,
   SecretImportTableRow,
   SecretNoAccessTableRow,
   SecretRotationTableRow,
@@ -3611,6 +3612,13 @@ const OverviewPageContent = () => {
             )}
           </CardContent>
         </Card>
+        {canReadSecrets && (
+          <SecretFilesSection
+            projectId={projectId}
+            secretPath={secretPath}
+            visibleEnvs={visibleEnvs}
+          />
+        )}
       </div>
       <Sheet
         open={popUp.addSecretsInAllEnvs.isOpen}

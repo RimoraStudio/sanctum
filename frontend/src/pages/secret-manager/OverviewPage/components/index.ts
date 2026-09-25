@@ -12,6 +12,7 @@ export * from "./ResourceCount";
 export * from "./ResourceFilter";
 export * from "./ResourceSearchInput";
 export * from "./SecretDropzone";
+export * from "./SecretFilesSection";
 export * from "./SecretImportTableRow";
 export * from "./SecretRotationTableRow";
 export * from "./SecretSyncStatusBadgeOverview";
