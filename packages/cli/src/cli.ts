@@ -1380,6 +1380,29 @@ const cmdAgents = (args: string[]) => {
   console.log(`Wrote Sanctum section to ${target}`);
 };
 
+/** Compare against the npm registry and self-update the global install. */
+const cmdUpdate = async (args: string[]) => {
+  const checkOnly = hasFlag(args, "--check");
+  const target = args[0]; // optional explicit version, e.g. sanctum update 0.5.1
+  if (target && !/^\d+\.\d+\.\d+(-[\w.-]+)?$/.test(target))
+    die(`Invalid version '${target}' - expected e.g. 0.5.1`);
+
+  const res = await fetch(`https://registry.npmjs.org/sanctum-cli/${encodeURIComponent(target ?? "latest")}`);
+  if (!res.ok) die(`npm registry unreachable or version not found (${res.status})`);
+  const { version } = (await res.json()) as { version: string };
+  if (version === VERSION) {
+    ok(`sanctum-cli is already at ${VERSION}`);
+    return;
+  }
+  if (checkOnly) {
+    console.log(`${VERSION} -> ${version} available. Run \`sanctum update${target ? ` ${target}` : ""}\` to install.`);
+    return;
+  }
+  console.log(`Updating sanctum-cli ${VERSION} -> ${version}...`);
+  execSync(`npm i -g sanctum-cli@${version}`, { stdio: "inherit" });
+  ok(`Updated to ${version}`);
+};
+
 /** Install the bundled skill into .agents/skills/sanctum-cli under cwd. */
 const cmdSkill = () => {
   const src = join(dirname(fileURLToPath(import.meta.url)), "..", "skills", "sanctum-cli");
@@ -1408,6 +1431,7 @@ Usage:
   sanctum doctor [--profile name]                   diagnose credentials, instance, auth, project access
   sanctum agents                                    add a Sanctum usage section to ./AGENTS.md
   sanctum skill                                     install the agent skill into ./.agents/skills/
+  sanctum update [version] [--check]                update to a release (latest by default; --check just reports)
   sanctum envs
   sanctum folders create <path> [--env x] [--all-envs]  create a secret path (nested ok, idempotent)
   sanctum folders list [--env x] [--path /x]
@@ -1441,6 +1465,10 @@ const main = async () => {
       case "doctor": return await cmdDoctor(args);
       case "agents": return cmdAgents(args);
       case "skill": return cmdSkill();
+      case "update": return await cmdUpdate(args);
+      case "version":
+      case "--version":
+      case "-v": return console.log(VERSION);
       case "envs": return await cmdEnvs(args);
       case "folders": return await cmdFolders(args);
       case "files": return await cmdFiles(args);
