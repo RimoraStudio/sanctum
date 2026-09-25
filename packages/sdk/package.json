@@ -1,6 +1,6 @@
 {
   "name": "sanctum-sdk",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "TypeScript SDK for the Sanctum secrets platform",
   "license": "MIT",
   "repository": {
