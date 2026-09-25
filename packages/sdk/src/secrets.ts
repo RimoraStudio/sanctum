@@ -49,12 +49,14 @@ export interface SecretScopeInput {
 export interface CreateSecretInput extends SecretScopeInput {
   secretValue: string;
   secretComment?: string;
+  secretMetadata?: { key: string; value: string }[];
   skipMultilineEncoding?: boolean;
 }
 
 export interface UpdateSecretInput extends SecretScopeInput {
   secretValue?: string;
   secretComment?: string;
+  secretMetadata?: { key: string; value: string }[];
   tags?: string[];
   skipMultilineEncoding?: boolean;
 }

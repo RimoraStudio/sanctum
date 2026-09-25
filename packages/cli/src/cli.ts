@@ -1,9 +1,10 @@
 ﻿#!/usr/bin/env node
 import { execFile, execSync, spawn } from "node:child_process";
-import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { createRequire } from "node:module";
-import { basename, dirname, join } from "node:path";
+import { basename, dirname, join, relative, resolve } from "node:path";
 
 import { SanctumApiError, SanctumSdk } from "sanctum-sdk";
 
@@ -117,14 +118,24 @@ const scopeQuery = (config: ResolvedConfig, secretPath: string, env?: string) =>
 const withPath = (config: ResolvedConfig, path?: string): ResolvedConfig =>
   path ? { ...config, secretPath: path, paths: [path] } : config;
 
-/** Fetch and merge secrets across all resolved paths; last path wins on conflicts. */
-const fetchMergedSecrets = async (
+const FILE_PREFIX = "FILE__";
+type SecretObj = Awaited<ReturnType<SanctumSdk["secrets"]["list"]>>["secrets"][number];
+
+const metaGet = (s: SecretObj, key: string) => s.secretMetadata?.find((m) => m.key === key)?.value;
+const isFileSecret = (s: SecretObj) =>
+  metaGet(s, "kind") === "file" || s.secretKey.startsWith(FILE_PREFIX);
+const sha256 = (buf: Buffer) => createHash("sha256").update(buf).digest("hex");
+const fileKey = (file: string) =>
+  FILE_PREFIX + basename(file).toUpperCase().replace(/[^A-Z0-9_]/g, "_");
+
+/** Fetch secrets across all resolved paths; last path wins on conflicts. */
+const fetchMergedSecretObjects = async (
   sdk: SanctumSdk,
   config: ResolvedConfig,
   env?: string,
   origins?: Map<string, string>
-): Promise<Record<string, string>> => {
-  const merged: Record<string, string> = {};
+): Promise<Map<string, SecretObj>> => {
+  const merged = new Map<string, SecretObj>();
   for (const path of config.paths) {
     const { secrets, imports } = await sdk.secrets.list({
       ...scopeQuery(config, path, env),
@@ -134,14 +145,30 @@ const fetchMergedSecrets = async (
     });
     for (const imp of imports ?? []) {
       for (const s of imp.secrets) {
-        merged[s.secretKey] = s.secretValue ?? "";
+        merged.set(s.secretKey, s);
         origins?.set(s.secretKey, `${path} (import)`);
       }
     }
     for (const s of secrets) {
-      merged[s.secretKey] = s.secretValue ?? "";
+      merged.set(s.secretKey, s);
       origins?.set(s.secretKey, path);
     }
+  }
+  return merged;
+};
+
+const fetchMergedSecrets = async (
+  sdk: SanctumSdk,
+  config: ResolvedConfig,
+  env?: string,
+  origins?: Map<string, string>,
+  includeFiles = false
+): Promise<Record<string, string>> => {
+  const objs = await fetchMergedSecretObjects(sdk, config, env, origins);
+  const merged: Record<string, string> = {};
+  for (const [key, s] of objs) {
+    if (!includeFiles && isFileSecret(s)) continue;
+    merged[key] = s.secretValue ?? "";
   }
   return merged;
 };
@@ -445,7 +472,7 @@ const cmdInit = async (args: string[]) => {
   if (rootFile) console.log(`Registered in ${rootFile}`);
   console.log(`  project:     ${project}`);
   console.log(`  environment: ${environment}`);
-  console.log(`  secretPath:  ${secretPath}${imports.length ? ` (+ imports: ${imports.join(", ")})` : ""}${profile ? `, profile: ${profile} (local only)` : ""}`);
+  console.log(`  secretPath:  ${secretPath} (vault-side folder, not a filesystem path)${imports.length ? ` (+ imports: ${imports.join(", ")})` : ""}${profile ? `, profile: ${profile} (local only)` : ""}`);
 };
 
 const cmdStatus = async () => {
@@ -532,15 +559,17 @@ const upsertSecret = async (
   sdk: SanctumSdk,
   key: string,
   secretValue: string,
-  scope: Record<string, unknown>
+  scope: Record<string, unknown>,
+  secretMetadata?: { key: string; value: string }[]
 ): Promise<{ verb: "Created" | "Updated"; approval?: { id: string; slug?: string } }> => {
+  const extra = secretMetadata ? { secretMetadata } : {};
   try {
-    const r = await sdk.secrets.create(key, { ...scope, secretValue } as never);
+    const r = await sdk.secrets.create(key, { ...scope, secretValue, ...extra } as never);
     return { verb: "Created", approval: r.approval };
   } catch (err) {
     const conflict = err instanceof SanctumApiError && /exist|conflict/i.test(err.message);
     if (!conflict) throw err;
-    const r = await sdk.secrets.update(key, { ...scope, secretValue } as never);
+    const r = await sdk.secrets.update(key, { ...scope, secretValue, ...extra } as never);
     return { verb: "Updated", approval: r.approval };
   }
 };
@@ -557,14 +586,20 @@ const cmdSecrets = async (args: string[]) => {
   switch (sub) {
     case "list": {
       const exact = hasFlag(args, "--exact");
+      const includeFiles = hasFlag(args, "--include-files");
       const cfg = exact ? withPath(config, path ?? config.secretPath ?? "/") : config;
       const origins = new Map<string, string>();
-      const merged = await fetchMergedSecrets(sdk, cfg, env, origins);
-      const keys = Object.keys(merged).sort();
+      const objs = await fetchMergedSecretObjects(sdk, cfg, env, origins);
+      const all = [...objs.values()];
+      const files = all.filter(isFileSecret);
+      const shown = includeFiles ? all : all.filter((s) => !isFileSecret(s));
+      const keys = shown.map((s) => s.secretKey).sort();
       const annotate = cfg.paths.length > 1;
       for (const k of keys) console.log(annotate ? `${k}  ${dim(origins.get(k) ?? "")}` : k);
       const scopeLabel = `${env ?? cfg.environment ?? "dev"} @ ${cfg.paths.join(", ")}`;
       console.log(dim(`\n${keys.length} secrets (${scopeLabel})`));
+      if (files.length && !includeFiles)
+        console.log(dim(`+ ${files.length} file secret(s) hidden - \`sanctum files list\` / --include-files`));
       if (!keys.length) console.log(dim(`empty or missing path. Check with \`sanctum folders list\` or create with \`sanctum folders create <path>\`.`));
       break;
     }
@@ -666,6 +701,101 @@ const cmdFolders = async (args: string[]) => {
   }
 };
 
+const cmdFiles = async (args: string[]) => {
+  const sub = args.shift();
+  const env = takeFlag(args, "--env");
+  const path = takeFlag(args, "--path");
+  const config = withPath(resolveConfig(), path);
+  const profile = takeFlag(args, "--profile") ?? getProjectProfile(config.projectSlug);
+  const sdk = await getClient(profile);
+  const envName = env ?? config.environment ?? "dev";
+
+  const listFileSecrets = async () =>
+    [...(await fetchMergedSecretObjects(sdk, config, env)).values()].filter(isFileSecret);
+
+  switch (sub) {
+    case "push": {
+      const file = args[0];
+      if (!file) die("Usage: sanctum files push <file> [--path /x] [--env x]");
+      if (!existsSync(file)) die(`${file} not found`);
+      const content = readFileSync(file);
+      // backend request body cap is 1 MB; base64 inflates ~4/3 so ~700 KB binary is the safe ceiling
+      const MAX_FILE_BYTES = 700 * 1024;
+      if (content.length > MAX_FILE_BYTES)
+        die(`${file} is ${(content.length / 1024).toFixed(0)} KB - file secrets cap at ~700 KB (1 MB API body limit after base64). Larger artifacts need blob storage, not KV secrets.`);
+      const key = fileKey(file);
+      const localPath = relative(process.cwd(), resolve(file)).split("\\").join("/") || basename(file);
+      const digest = sha256(content);
+      await ensureRemotePath(sdk, config, env);
+      const result = await upsertSecret(sdk, key, content.toString("base64"), scopeQuery(config, config.secretPath ?? "/", env), [
+        { key: "kind", value: "file" },
+        { key: "localPath", value: localPath },
+        { key: "sha256", value: digest }
+      ]);
+      if (result.approval) console.log(`${yellow("?")} ${key} queued for approval${result.approval.slug ? ` (${result.approval.slug})` : ""}`);
+      else ok(`${result.verb} ${key}  ${dim(`${localPath}, sha256 ${digest.slice(0, 12)}`)}`);
+      break;
+    }
+    case "list": {
+      const files = await listFileSecrets();
+      for (const f of files) {
+        const digest = metaGet(f, "sha256")?.slice(0, 12);
+        console.log(`${f.secretKey.padEnd(40)} ${dim(`${metaGet(f, "localPath") ?? "?"}${digest ? `  sha256:${digest}` : ""}`)}`);
+      }
+      if (!files.length) console.log(dim(`no file secrets at ${envName} @ ${config.paths.join(", ")} - push one with \`sanctum files push <file>\``));
+      break;
+    }
+    case "pull": {
+      const to = takeFlag(args, "--to");
+      const force = hasFlag(args, "--force");
+      const files = await listFileSecrets();
+      if (!files.length) {
+        console.log("No file secrets.");
+        break;
+      }
+      let wrote = 0;
+      let skipped = 0;
+      for (const f of files) {
+        const lp = metaGet(f, "localPath") ?? f.secretKey.slice(FILE_PREFIX.length).toLowerCase();
+        const dest = to ? join(to, basename(lp)) : resolve(process.cwd(), lp);
+        const storedSha = metaGet(f, "sha256");
+        if (existsSync(dest)) {
+          const localSha = sha256(readFileSync(dest));
+          if (localSha === storedSha) {
+            skipped += 1;
+            continue;
+          }
+          if (storedSha && !force) {
+            console.log(`${yellow("!")} ${lp} - locally modified, skipped (--force to overwrite)`);
+            skipped += 1;
+            continue;
+          }
+        }
+        mkdirSync(dirname(dest), { recursive: true });
+        writeFileSync(dest, Buffer.from(f.secretValue ?? "", "base64"));
+        ok(`wrote ${to ? join(to, basename(lp)) : lp}`);
+        wrote += 1;
+      }
+      console.log(dim(`${wrote} written, ${skipped} skipped`));
+      break;
+    }
+    case "diff": {
+      const files = await listFileSecrets();
+      for (const f of files) {
+        const lp = metaGet(f, "localPath") ?? "?";
+        const storedSha = metaGet(f, "sha256");
+        if (!existsSync(lp)) console.log(`${yellow("+")} ${lp}  ${dim("missing locally")}`);
+        else if (storedSha && sha256(readFileSync(lp)) !== storedSha) console.log(`${yellow("~")} ${lp}  ${dim("modified locally")}`);
+        else console.log(`${dim("=")} ${lp}`);
+      }
+      if (!files.length) console.log("No file secrets.");
+      break;
+    }
+    default:
+      die("Usage: sanctum files <push <file>|pull [--to dir] [--force]|list|diff> [--env x] [--path /x]");
+  }
+};
+
 const maskValue = (v: string): string => (v.length <= 4 ? "****" : `${v.slice(0, 2)}***${v.slice(-2)}`);
 
 const diffOne = async (
@@ -673,10 +803,11 @@ const diffOne = async (
   config: ResolvedConfig,
   file: string,
   env: string | undefined,
-  showValues: boolean
+  showValues: boolean,
+  includeFiles = false
 ) => {
   const local = existsSync(file) ? sdk.dotenv.parseDotenv(readFileSync(file, "utf8")) : {};
-  const remote = await fetchMergedSecrets(sdk, config, env);
+  const remote = await fetchMergedSecrets(sdk, config, env, undefined, includeFiles);
 
   const localKeys = new Set(Object.keys(local));
   const remoteKeys = new Set(Object.keys(remote));
@@ -711,6 +842,7 @@ const cmdDiff = async (args: string[]) => {
   const env = takeFlag(args, "--env");
   const path = takeFlag(args, "--path");
   const showValues = hasFlag(args, "--values");
+  const includeFiles = hasFlag(args, "--include-files");
   const all = hasFlag(args, "--all");
   const config = resolveConfig();
   const profile = takeFlag(args, "--profile") ?? getProjectProfile(config.projectSlug);
@@ -742,12 +874,12 @@ const cmdDiff = async (args: string[]) => {
       console.log(`\n== ${rel} ==`);
       const childDir = join(rootDir, rel);
       const childConfig = resolveConfig(childDir);
-      await diffOne(sdk, withPath(childConfig, path), join(childDir, file), env, showValues);
+      await diffOne(sdk, withPath(childConfig, path), join(childDir, file), env, showValues, includeFiles);
     }
     if (selected.length) return;
   }
 
-  await diffOne(sdk, withPath(config, path), file, env, showValues);
+  await diffOne(sdk, withPath(config, path), file, env, showValues, includeFiles);
 };
 
 const cmdExport = async (args: string[]) => {
@@ -755,10 +887,11 @@ const cmdExport = async (args: string[]) => {
   const path = takeFlag(args, "--path");
   const format = takeFlag(args, "--format") ?? "dotenv";
   const outFile = takeFlag(args, "--out");
+  const includeFiles = hasFlag(args, "--include-files");
   const config = resolveConfig();
   const profile = takeFlag(args, "--profile") ?? getProjectProfile(config.projectSlug);
   const sdk = await getClient(profile);
-  const merged = await fetchMergedSecrets(sdk, withPath(config, path), env);
+  const merged = await fetchMergedSecrets(sdk, withPath(config, path), env, undefined, includeFiles);
 
   let output: string;
   if (format === "json") {
@@ -801,9 +934,10 @@ const pullOne = async (
   config: ResolvedConfig,
   outFile: string,
   env: string | undefined,
-  skipConfirm = false
+  skipConfirm = false,
+  includeFiles = false
 ) => {
-  const merged = await fetchMergedSecrets(sdk, config, env);
+  const merged = await fetchMergedSecrets(sdk, config, env, undefined, includeFiles);
   if (existsSync(outFile)) {
     const { text, updated, added } = mergeDotenv(readFileSync(outFile, "utf8"), merged);
     if (!updated && !added) {
@@ -833,6 +967,7 @@ const cmdPull = async (args: string[]) => {
   const path = takeFlag(args, "--path");
   const all = hasFlag(args, "--all");
   const yes = hasFlag(args, "--yes") || hasFlag(args, "-y") || hasFlag(args, "--force");
+  const includeFiles = hasFlag(args, "--include-files");
   const outFlag = takeFlag(args, "--out");
   const config = resolveConfig();
   const profile = takeFlag(args, "--profile") ?? getProjectProfile(config.projectSlug);
@@ -862,7 +997,7 @@ const cmdPull = async (args: string[]) => {
     for (const rel of selected) {
       const childDir = join(rootDir, rel);
       console.log(`\n== ${rel} ==`);
-      await pullOne(sdk, withPath(resolveConfig(childDir), path), join(childDir, file), env, yes);
+      await pullOne(sdk, withPath(resolveConfig(childDir), path), join(childDir, file), env, yes, includeFiles);
     }
     if (selected.length) {
       console.log("note: pulled files contain real secret values - keep them out of git.");
@@ -870,7 +1005,7 @@ const cmdPull = async (args: string[]) => {
     }
   }
 
-  await pullOne(sdk, withPath(config, path), file, env, yes);
+  await pullOne(sdk, withPath(config, path), file, env, yes, includeFiles);
   console.log("note: pulled files contain real secret values - keep them out of git.");
 };
 
@@ -1033,8 +1168,38 @@ is \`sanctum-cli\` (install: \`npm i -g sanctum-cli\`), NOT \`sanctum\` (unrelat
   paths). \`sanctum whoami\` prints the active profile, instance URL, and token expiry.
   \`sanctum doctor\` checks credentials, instance reachability, auth, and whether this
   identity can see the configured project.
-- Overrides: \`--env staging\` works on secrets/diff/pull/push/run/folders.
-  \`--path /other\` works on secrets commands. \`--profile name\` selects credentials.
+- Overrides: \`--env staging\` works on secrets/diff/pull/push/run/folders/files.
+  \`--path /other\` works on secrets, files, diff, pull, push, export.
+  \`--profile name\` selects credentials.
+
+### Secret paths are vault-side, not filesystem
+
+- \`secretPath\` is a folder namespace on the Sanctum server, NOT a path on disk.
+  \`/mrhr-api\` never maps to \`./mrhr-api\` directly - it only mirrors the repo
+  layout by convention (\`init\` defaults it from the directory name).
+- Secrets and files share the same path namespace. \`secrets list\` hides file
+  secrets; \`files list\` shows only files.
+- The merged view walks ancestor paths: a leaf at \`/apps/api\` inherits keys from
+  \`/\` and \`/apps\`. \`imports: ["/shared"]\` adds more paths to the merge.
+- \`secrets list --exact\` shows only the leaf path (no inherited keys).
+
+### File secrets (binary)
+
+- \`sanctum files push <path>\` stores a binary file base64-encoded under key
+  \`FILE__<NAME>\` (filename uppercased, non-alphanumeric -> \`_\`) with metadata:
+  \`kind=file\`, \`localPath\` (repo-relative path at push time), \`sha256\`.
+- \`sanctum files pull\` restores each file to its recorded \`localPath\` relative
+  to cwd (no path argument needed). \`--to <dir>\` redirects to a directory,
+  \`--force\` overwrites locally-modified files (sha256 mismatch is refused).
+- \`sanctum files diff\` compares local file sha256 against stored metadata
+  without downloading content.
+- File secrets are EXCLUDED from \`pull\`, \`export\`, \`diff\`, \`run\`, and
+  \`secrets list\` by default (base64 blobs would pollute .env files). Pass
+  \`--include-files\` to pull/export/diff to include them.
+- Size cap: ~700 KB per file (1 MB API body limit after base64 overhead). Larger
+  artifacts need real blob storage, not KV secrets.
+- Escape hatch for raw base64: \`secrets set <KEY> --file <path>\` /
+  \`secrets get <KEY> --file <out>\` (no metadata, not excluded from env ops).
 
 ### Monorepo layout
 
@@ -1154,6 +1319,7 @@ Usage:
   sanctum envs
   sanctum folders create <path> [--env x] [--all-envs]  create a secret path (nested ok, idempotent)
   sanctum folders list [--env x] [--path /x]
+  sanctum files push <file> | pull [--to dir] [--force] | list | diff   binary secrets (base64 + sha256 + localPath metadata)
   sanctum secrets list [--exact]|get <KEY> [--file out]|set <KEY>=<v>|set <KEY> --file <bin>|rm <KEY> [--yes]
               [--env x] [--path /x] [--profile name]
   sanctum export [--env x] [--path /x] [--format dotenv|json] [--out file]
@@ -1184,6 +1350,7 @@ const main = async () => {
       case "agents": return cmdAgents(args);
       case "envs": return await cmdEnvs(args);
       case "folders": return await cmdFolders(args);
+      case "files": return await cmdFiles(args);
       case "secrets": return await cmdSecrets(args);
       case "export": return await cmdExport(args);
       case "diff": return await cmdDiff(args);

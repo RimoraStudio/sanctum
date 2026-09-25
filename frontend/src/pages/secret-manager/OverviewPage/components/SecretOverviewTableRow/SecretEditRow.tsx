@@ -14,6 +14,7 @@ import { twMerge } from "tailwind-merge";
 
 import { createNotification } from "@app/components/notifications";
 import { ProjectPermissionCan } from "@app/components/permissions";
+import { isFileSecret, SecretFileValue } from "@app/components/secrets/SecretFileValue";
 import { SecretReferenceTree } from "@app/components/secrets/SecretReferenceDetails";
 import { DeleteActionModal, IconButton, Modal, ModalContent, Tooltip } from "@app/components/v2";
 import { SanctumSecretInput } from "@app/components/v2/SanctumSecretInput";
@@ -58,6 +59,7 @@ type Props = {
     originalValue?: string;
   }) => Promise<void>;
   onSecretDelete: (env: string, key: string, secretId?: string) => Promise<void>;
+  secretMetadata?: { key: string; value: string; isEncrypted?: boolean }[];
   isRotatedSecret?: boolean;
   isHoneyTokenSecret?: boolean;
   isEmpty?: boolean;
@@ -100,8 +102,10 @@ export const SecretEditRow = ({
   importedBy,
   importedSecret,
   isEmpty,
-  isSecretPresent
+  isSecretPresent,
+  secretMetadata
 }: Props) => {
+  const isFile = isFileSecret(secretMetadata);
   const isManagedSecret = isRotatedSecret || isHoneyTokenSecret;
 
   let deleteTooltipContent = "Delete";
@@ -288,6 +292,17 @@ export const SecretEditRow = ({
         </Tooltip>
       )}
       <div className="grow border-r border-r-mineshaft-600 pr-2 pl-1">
+        {isFile ? (
+          <SecretFileValue
+            secretMetadata={secretMetadata}
+            base64Value={secretValueData?.valueOverride ?? secretValueData?.value}
+            disabled={secretValueHidden}
+            onDownload={async () => {
+              const { data } = await refetchSecretValue();
+              return data?.valueOverride ?? data?.value;
+            }}
+          />
+        ) : (
         <Controller
           control={control}
           name="value"
@@ -323,6 +338,7 @@ export const SecretEditRow = ({
             />
           )}
         />
+        )}
       </div>
 
       <div
@@ -375,6 +391,7 @@ export const SecretEditRow = ({
           </>
         ) : (
           <>
+            {!isFile && (
             <div className="opacity-0 group-hover:opacity-100">
               <Tooltip content="Copy Secret">
                 <IconButton
@@ -388,7 +405,9 @@ export const SecretEditRow = ({
                 </IconButton>
               </Tooltip>
             </div>
+            )}
 
+            {!isFile && (
             <div className="opacity-0 group-hover:opacity-100">
               <Tooltip content="Secret Reference Tree">
                 <IconButton
@@ -402,6 +421,7 @@ export const SecretEditRow = ({
                 </IconButton>
               </Tooltip>
             </div>
+            )}
             <Modal
               isOpen={popUp.secretReferenceTree.isOpen}
               onOpenChange={(isOpen) => handlePopUpToggle("secretReferenceTree", isOpen)}

@@ -286,6 +286,7 @@ export const SecretOverviewTableRow = ({
                               secretValueHidden={secret?.secretValueHidden || false}
                               defaultValue={getDefaultValue(secret, importedSecret)}
                               secretId={secret?.id}
+                              secretMetadata={secret?.secretMetadata}
                               isOverride={Boolean(secret?.idOverride)}
                               isImportedSecret={isImportedSecret}
                               importedSecret={importedSecret}

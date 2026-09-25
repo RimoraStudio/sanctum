@@ -23,6 +23,7 @@ import {
   TextArea,
   Tooltip
 } from "@app/components/v2";
+import { isFileSecret, SecretFileValue } from "@app/components/secrets/SecretFileValue";
 import { SanctumSecretInput } from "@app/components/v2/SanctumSecretInput";
 import {
   ProjectPermissionActions,
@@ -554,6 +555,13 @@ export const SecretItem = memo(
                       containerClassName="py-1.5 rounded-md transition-all"
                     />
                   )}
+                />
+              ) : isFileSecret(secret.secretMetadata) ? (
+                <SecretFileValue
+                  secretMetadata={secret.secretMetadata}
+                  base64Value={secret.value}
+                  disabled={secret.secretValueHidden}
+                  onDownload={async () => (await fetchValue())?.value}
                 />
               ) : (
                 <Controller

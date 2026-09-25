@@ -91,6 +91,11 @@ export const downloadSecretEnvFile = (
   downloadTxtFile(`${environment}.env`, file);
 };
 
+export const downloadBase64File = (filename: string, base64: string) => {
+  const bytes = Uint8Array.from(atob(base64), (ch) => ch.charCodeAt(0));
+  FileSaver.saveAs(new Blob([bytes]), filename);
+};
+
 export const downloadFile = (content: string, filename: string, mimeType: string = "text/csv") => {
   const blob = new Blob([content], { type: mimeType });
   const url = window.URL.createObjectURL(blob);
