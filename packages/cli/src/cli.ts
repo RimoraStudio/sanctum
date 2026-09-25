@@ -1,9 +1,10 @@
 ﻿#!/usr/bin/env node
 import { execFile, execSync, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
 import { basename, dirname, join, relative, resolve } from "node:path";
 
 import { isFilesApiUnavailable, SanctumApiError, SanctumSdk } from "sanctum-sdk";
@@ -1291,6 +1292,9 @@ is \`sanctum-cli\` (install: \`npm i -g sanctum-cli\`), NOT \`sanctum\` (unrelat
 - Secret values are masked in \`diff\` output unless \`--values\` is passed. Keep them masked.
 - Profiles are personal and live in \`~/.sanctum/credentials.json\`. Never write
   profile names or credentials into \`sanctum-config.json\`.
+- If your agent runtime supports skills, run \`sanctum skill\` to install the
+  fuller skill bundle (SKILL.md + command/file/monorepo references) into
+  \`.agents/skills/sanctum-cli/\`.
 
 ### When a tool needs a real .env file
 
@@ -1376,6 +1380,16 @@ const cmdAgents = (args: string[]) => {
   console.log(`Wrote Sanctum section to ${target}`);
 };
 
+/** Install the bundled skill into .agents/skills/sanctum-cli under cwd. */
+const cmdSkill = () => {
+  const src = join(dirname(fileURLToPath(import.meta.url)), "..", "skills", "sanctum-cli");
+  if (!existsSync(src)) die(`Bundled skill not found at ${src} - reinstall sanctum-cli.`);
+  const target = join(process.cwd(), ".agents", "skills", "sanctum-cli");
+  mkdirSync(target, { recursive: true });
+  cpSync(src, target, { recursive: true });
+  ok(`Wrote skill to ${target}${SYM.dash} commit it so agents in this repo can use it`);
+};
+
 const HELP = `sanctum - CLI for the Sanctum secrets platform
 
 Usage:
@@ -1393,6 +1407,7 @@ Usage:
   sanctum status                                    show resolved config + linked monorepo projects
   sanctum doctor [--profile name]                   diagnose credentials, instance, auth, project access
   sanctum agents                                    add a Sanctum usage section to ./AGENTS.md
+  sanctum skill                                     install the agent skill into ./.agents/skills/
   sanctum envs
   sanctum folders create <path> [--env x] [--all-envs]  create a secret path (nested ok, idempotent)
   sanctum folders list [--env x] [--path /x]
@@ -1425,6 +1440,7 @@ const main = async () => {
       case "status": return await cmdStatus();
       case "doctor": return await cmdDoctor(args);
       case "agents": return cmdAgents(args);
+      case "skill": return cmdSkill();
       case "envs": return await cmdEnvs(args);
       case "folders": return await cmdFolders(args);
       case "files": return await cmdFiles(args);
