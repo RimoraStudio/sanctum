@@ -94,6 +94,7 @@ export enum TableName {
   SecretVersion = "secret_versions",
   SecretFolder = "secret_folders",
   SecretFolderVersion = "secret_folder_versions",
+  SecretFile = "secret_files",
   SecretImport = "secret_imports",
   ProjectFolderGrant = "project_folder_grants",
   Snapshot = "secret_snapshots",

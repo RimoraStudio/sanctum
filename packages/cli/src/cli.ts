@@ -6,7 +6,7 @@ import { createServer } from "node:http";
 import { createRequire } from "node:module";
 import { basename, dirname, join, relative, resolve } from "node:path";
 
-import { SanctumApiError, SanctumSdk } from "sanctum-sdk";
+import { isFilesApiUnavailable, SanctumApiError, SanctumSdk } from "sanctum-sdk";
 
 import {
   getProjectProfile,
@@ -709,9 +709,31 @@ const cmdFiles = async (args: string[]) => {
   const profile = takeFlag(args, "--profile") ?? getProjectProfile(config.projectSlug);
   const sdk = await getClient(profile);
   const envName = env ?? config.environment ?? "dev";
+  const projectScope = { projectId: config.projectId, projectSlug: config.projectSlug };
 
-  const listFileSecrets = async () =>
-    [...(await fetchMergedSecretObjects(sdk, config, env)).values()].filter(isFileSecret);
+  // Blob API first; FILE__ KV secrets remain for instances that predate /api/v3/files
+  const listBlobFiles = async (): Promise<{ name: string; localPath?: string | null; sha256?: string; id?: string; path?: string; legacy?: boolean }[]> => {
+    const out: { name: string; localPath?: string | null; sha256?: string; id?: string; path?: string; legacy?: boolean }[] = [];
+    for (const p of config.paths) {
+      try {
+        const { files } = await sdk.files.list({ ...projectScope, environment: envName, path: p });
+        for (const f of files) out.push({ name: f.name, localPath: f.localPath, sha256: f.sha256, id: f.id, path: p });
+      } catch (err) {
+        if (!isFilesApiUnavailable(err)) throw err;
+      }
+    }
+    return out;
+  };
+
+  const listLegacy = async () =>
+    [...(await fetchMergedSecretObjects(sdk, config, env)).values()].filter(isFileSecret).map((f) => ({
+      name: f.secretKey,
+      localPath: metaGet(f, "localPath"),
+      sha256: metaGet(f, "sha256"),
+      legacy: true
+    }));
+
+  const listAll = async () => [...(await listBlobFiles()), ...(await listLegacy())];
 
   switch (sub) {
     case "push": {
@@ -719,28 +741,43 @@ const cmdFiles = async (args: string[]) => {
       if (!file) die("Usage: sanctum files push <file> [--path /x] [--env x]");
       if (!existsSync(file)) die(`${file} not found`);
       const content = readFileSync(file);
-      // backend request body cap is 1 MB; base64 inflates ~4/3 so ~700 KB binary is the safe ceiling
-      const MAX_FILE_BYTES = 700 * 1024;
-      if (content.length > MAX_FILE_BYTES)
-        die(`${file} is ${(content.length / 1024).toFixed(0)} KB - file secrets cap at ~700 KB (1 MB API body limit after base64). Larger artifacts need blob storage, not KV secrets.`);
-      const key = fileKey(file);
+      const MAX_BLOB_BYTES = 32 * 1024 * 1024;
+      if (content.length > MAX_BLOB_BYTES) die(`${file} exceeds the 32 MB file limit.`);
       const localPath = relative(process.cwd(), resolve(file)).split("\\").join("/") || basename(file);
       const digest = sha256(content);
-      await ensureRemotePath(sdk, config, env);
-      const result = await upsertSecret(sdk, key, content.toString("base64"), scopeQuery(config, config.secretPath ?? "/", env), [
-        { key: "kind", value: "file" },
-        { key: "localPath", value: localPath },
-        { key: "sha256", value: digest }
-      ]);
-      if (result.approval) console.log(`${yellow("?")} ${key} queued for approval${result.approval.slug ? ` (${result.approval.slug})` : ""}`);
-      else ok(`${result.verb} ${key}  ${dim(`${localPath}, sha256 ${digest.slice(0, 12)}`)}`);
+      try {
+        const { file: f } = await sdk.files.upload({
+          ...projectScope,
+          environment: envName,
+          path: config.secretPath ?? "/",
+          name: basename(file),
+          localPath,
+          sha256: digest,
+          content
+        });
+        ok(`Stored ${f.name}  ${dim(`${localPath}, sha256 ${digest.slice(0, 12)}, v${f.version ?? 1}`)}`);
+      } catch (err) {
+        if (!isFilesApiUnavailable(err)) throw err;
+        // legacy fallback: base64 KV secret (1 MB body cap -> ~700 KB binary)
+        if (content.length > 700 * 1024)
+          die(`${file} is too large for this server version (~700 KB KV cap); upgrade the backend for 32 MB blob storage.`);
+        const key = fileKey(file);
+        await ensureRemotePath(sdk, config, env);
+        const result = await upsertSecret(sdk, key, content.toString("base64"), scopeQuery(config, config.secretPath ?? "/", env), [
+          { key: "kind", value: "file" },
+          { key: "localPath", value: localPath },
+          { key: "sha256", value: digest }
+        ]);
+        if (result.approval) console.log(`${yellow("?")} ${key} queued for approval${result.approval.slug ? ` (${result.approval.slug})` : ""}`);
+        else ok(`${result.verb} ${key}  ${dim(`${localPath}, sha256 ${digest.slice(0, 12)}`)}`);
+      }
       break;
     }
     case "list": {
-      const files = await listFileSecrets();
+      const files = await listAll();
       for (const f of files) {
-        const digest = metaGet(f, "sha256")?.slice(0, 12);
-        console.log(`${f.secretKey.padEnd(40)} ${dim(`${metaGet(f, "localPath") ?? "?"}${digest ? `  sha256:${digest}` : ""}`)}`);
+        const digest = f.sha256?.slice(0, 12);
+        console.log(`${f.name.padEnd(40)} ${dim(`${f.localPath ?? "?"}${digest ? `  sha256:${digest}` : ""}${f.legacy ? "  (kv)" : ""}`)}`);
       }
       if (!files.length) console.log(dim(`no file secrets at ${envName} @ ${config.paths.join(", ")} - push one with \`sanctum files push <file>\``));
       break;
@@ -748,44 +785,73 @@ const cmdFiles = async (args: string[]) => {
     case "pull": {
       const to = takeFlag(args, "--to");
       const force = hasFlag(args, "--force");
-      const files = await listFileSecrets();
-      if (!files.length) {
+      const blobs = await listBlobFiles();
+      const legacy = await listLegacy();
+      if (!blobs.length && !legacy.length) {
         console.log("No file secrets.");
         break;
       }
       let wrote = 0;
       let skipped = 0;
-      for (const f of files) {
-        const lp = metaGet(f, "localPath") ?? f.secretKey.slice(FILE_PREFIX.length).toLowerCase();
+      const safeLocalPath = (lp: string) =>
+        !/^[A-Za-z]:|^[/\\]/.test(lp) && !lp.split(/[/\\]/).includes("..") && resolve(process.cwd(), lp).startsWith(process.cwd());
+      const writeDest = (lp: string, storedSha: string | undefined, bytes: Buffer | undefined) => {
+        if (!to && !safeLocalPath(lp)) {
+          console.log(`${yellow("!")} ${lp} - unsafe restore path, use --to <dir> to extract`);
+          skipped += 1;
+          return;
+        }
         const dest = to ? join(to, basename(lp)) : resolve(process.cwd(), lp);
-        const storedSha = metaGet(f, "sha256");
         if (existsSync(dest)) {
           const localSha = sha256(readFileSync(dest));
           if (localSha === storedSha) {
             skipped += 1;
-            continue;
+            return;
           }
           if (storedSha && !force) {
+            console.log(`${yellow("!")} ${lp} - locally modified, skipped (--force to overwrite)`);
+            skipped += 1;
+            return;
+          }
+        }
+        mkdirSync(dirname(dest), { recursive: true });
+        writeFileSync(dest, bytes ?? "");
+        ok(`wrote ${to ? join(to, basename(lp)) : lp}`);
+        wrote += 1;
+      };
+      for (const f of blobs) {
+        const lp = f.localPath ?? f.name;
+        const dest = to ? join(to, basename(lp)) : resolve(process.cwd(), lp);
+        if (existsSync(dest) && f.sha256) {
+          const localSha = sha256(readFileSync(dest));
+          if (localSha === f.sha256) {
+            skipped += 1;
+            continue;
+          }
+          if (!force) {
             console.log(`${yellow("!")} ${lp} - locally modified, skipped (--force to overwrite)`);
             skipped += 1;
             continue;
           }
         }
-        mkdirSync(dirname(dest), { recursive: true });
-        writeFileSync(dest, Buffer.from(f.secretValue ?? "", "base64"));
-        ok(`wrote ${to ? join(to, basename(lp)) : lp}`);
-        wrote += 1;
+        if (!f.id) continue;
+        const { content } = await sdk.files.download(projectScope, f.id);
+        writeDest(lp, f.sha256, Buffer.from(content));
+      }
+      for (const f of legacy) {
+        const lp = f.localPath ?? f.name.slice(FILE_PREFIX.length).toLowerCase();
+        const secret = (await fetchMergedSecretObjects(sdk, config, env)).get(f.name);
+        writeDest(lp, f.sha256, secret ? Buffer.from(secret.secretValue ?? "", "base64") : undefined);
       }
       console.log(dim(`${wrote} written, ${skipped} skipped`));
       break;
     }
     case "diff": {
-      const files = await listFileSecrets();
+      const files = await listAll();
       for (const f of files) {
-        const lp = metaGet(f, "localPath") ?? "?";
-        const storedSha = metaGet(f, "sha256");
+        const lp = f.localPath ?? f.name;
         if (!existsSync(lp)) console.log(`${yellow("+")} ${lp}  ${dim("missing locally")}`);
-        else if (storedSha && sha256(readFileSync(lp)) !== storedSha) console.log(`${yellow("~")} ${lp}  ${dim("modified locally")}`);
+        else if (f.sha256 && sha256(readFileSync(lp)) !== f.sha256) console.log(`${yellow("~")} ${lp}  ${dim("modified locally")}`);
         else console.log(`${dim("=")} ${lp}`);
       }
       if (!files.length) console.log("No file secrets.");
@@ -1185,19 +1251,21 @@ is \`sanctum-cli\` (install: \`npm i -g sanctum-cli\`), NOT \`sanctum\` (unrelat
 
 ### File secrets (binary)
 
-- \`sanctum files push <path>\` stores a binary file base64-encoded under key
-  \`FILE__<NAME>\` (filename uppercased, non-alphanumeric -> \`_\`) with metadata:
-  \`kind=file\`, \`localPath\` (repo-relative path at push time), \`sha256\`.
+- \`sanctum files push <path>\` uploads the raw file to the file store
+  (\`/api/v3/files\`, encrypted at rest, 32 MB cap) under the file's basename,
+  with \`localPath\` (repo-relative path at push time) and \`sha256\` metadata.
+  On backends without the file API it falls back to a base64 KV secret under
+  key \`FILE__<NAME>\` (~700 KB cap, \`kind=file\` metadata).
 - \`sanctum files pull\` restores each file to its recorded \`localPath\` relative
   to cwd (no path argument needed). \`--to <dir>\` redirects to a directory,
   \`--force\` overwrites locally-modified files (sha256 mismatch is refused).
+  A stored \`localPath\` that escapes the project (\`../\`, absolute) is refused;
+  use \`--to\` to extract those files safely.
 - \`sanctum files diff\` compares local file sha256 against stored metadata
   without downloading content.
-- File secrets are EXCLUDED from \`pull\`, \`export\`, \`diff\`, \`run\`, and
+- KV file secrets are EXCLUDED from \`pull\`, \`export\`, \`diff\`, \`run\`, and
   \`secrets list\` by default (base64 blobs would pollute .env files). Pass
   \`--include-files\` to pull/export/diff to include them.
-- Size cap: ~700 KB per file (1 MB API body limit after base64 overhead). Larger
-  artifacts need real blob storage, not KV secrets.
 - Escape hatch for raw base64: \`secrets set <KEY> --file <path>\` /
   \`secrets get <KEY> --file <out>\` (no metadata, not excluded from env ops).
 

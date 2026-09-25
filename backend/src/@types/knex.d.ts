@@ -557,6 +557,9 @@ import {
   TSecretBlindIndexes,
   TSecretBlindIndexesInsert,
   TSecretBlindIndexesUpdate,
+  TSecretFiles,
+  TSecretFilesInsert,
+  TSecretFilesUpdate,
   TSecretFolders,
   TSecretFoldersInsert,
   TSecretFoldersUpdate,
@@ -1122,6 +1125,11 @@ declare module "knex/types/tables" {
       TSecretFolderVersions,
       TSecretFolderVersionsInsert,
       TSecretFolderVersionsUpdate
+    >;
+    [TableName.SecretFile]: KnexOriginal.CompositeTableType<
+      TSecretFiles,
+      TSecretFilesInsert,
+      TSecretFilesUpdate
     >;
     [TableName.SecretSharing]: KnexOriginal.CompositeTableType<
       TSecretSharing,

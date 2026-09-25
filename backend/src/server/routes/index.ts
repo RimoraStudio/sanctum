@@ -474,6 +474,8 @@ import { secretVersionDALFactory } from "@app/services/secret/secret-version-dal
 import { secretVersionTagDALFactory } from "@app/services/secret/secret-version-tag-dal";
 import { secretBlindIndexDALFactory } from "@app/services/secret-blind-index/secret-blind-index-dal";
 import { secretBlindIndexServiceFactory } from "@app/services/secret-blind-index/secret-blind-index-service";
+import { secretFileDALFactory } from "@app/services/secret-file/secret-file-dal";
+import { secretFileServiceFactory } from "@app/services/secret-file/secret-file-service";
 import { secretFolderDALFactory } from "@app/services/secret-folder/secret-folder-dal";
 import { secretFolderServiceFactory } from "@app/services/secret-folder/secret-folder-service";
 import { secretFolderVersionDALFactory } from "@app/services/secret-folder/secret-folder-version-dal";
@@ -616,6 +618,7 @@ export const registerRoutes = async (
   const secretTagDAL = secretTagDALFactory(db);
   const secretValidationRuleDAL = secretValidationRuleDALFactory(db);
   const folderDAL = secretFolderDALFactory(db);
+  const secretFileDAL = secretFileDALFactory(db);
   const folderVersionDAL = secretFolderVersionDALFactory(db);
   const secretImportDAL = secretImportDALFactory(db);
   const projectFolderGrantDAL = projectFolderGrantDALFactory(db);
@@ -2410,6 +2413,13 @@ export const registerRoutes = async (
     keyStore
   });
 
+  const secretFileService = secretFileServiceFactory({
+    secretFileDAL,
+    permissionService,
+    kmsService,
+    projectEnvDAL
+  });
+
   const secretSharingService = secretSharingServiceFactory({
     permissionService,
     secretSharingDAL,
@@ -4031,6 +4041,7 @@ export const registerRoutes = async (
     secretValidationRule: secretValidationRuleService,
     rateLimit: rateLimitService,
     folder: folderService,
+    secretFile: secretFileService,
     resourceMetadata: resourceMetadataService,
     secretImport: secretImportService,
     projectFolderGrant: projectFolderGrantService,
