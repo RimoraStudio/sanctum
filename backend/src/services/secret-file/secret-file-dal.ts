@@ -18,23 +18,31 @@ export const secretFileDALFactory = (db: TDbClient) => {
       .select("*")
       .first();
 
+  const publicColumns = [
+    "id",
+    "envId",
+    "secretPath",
+    "name",
+    "localPath",
+    "description",
+    "sha256",
+    "sizeBytes",
+    "version",
+    "createdAt",
+    "updatedAt"
+  ];
+
   const findByEnvAndPath = async ({ envId, secretPath }: { envId: string; secretPath: string }, tx?: Knex) =>
     (tx || db.replicaNode())(TableName.SecretFile)
       .where({ envId, secretPath })
-      .select(
-        "id",
-        "envId",
-        "secretPath",
-        "name",
-        "localPath",
-        "description",
-        "sha256",
-        "sizeBytes",
-        "version",
-        "createdAt",
-        "updatedAt"
-      )
+      .select(publicColumns)
       .orderBy("name", "asc");
 
-  return { ...secretFileOrm, findOneByScope, findByEnvAndPath };
+  const findByEnv = async ({ envId }: { envId: string }, tx?: Knex) =>
+    (tx || db.replicaNode())(TableName.SecretFile)
+      .where({ envId })
+      .select(publicColumns)
+      .orderBy(["secretPath", "name"]);
+
+  return { ...secretFileOrm, findOneByScope, findByEnvAndPath, findByEnv };
 };

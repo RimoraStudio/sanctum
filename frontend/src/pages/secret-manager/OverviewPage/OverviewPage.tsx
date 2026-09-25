@@ -248,7 +248,7 @@ import {
   ResourceCount,
   ResourceFilter,
   ResourceSearchInput,
-  SecretFilesSection,
+  SecretFilesRows,
   SecretImportTableRow,
   SecretNoAccessTableRow,
   SecretRotationTableRow,
@@ -3565,6 +3565,13 @@ const OverviewPageContent = () => {
                               isSelectionDisabled={hasPendingBatchChanges}
                             />
                           ))}
+                          {page === 1 && (
+                            <SecretFilesRows
+                              projectId={projectId}
+                              secretPath={secretPath}
+                              visibleEnvs={visibleEnvs}
+                            />
+                          )}
                           <SecretNoAccessTableRow
                             environments={visibleEnvs}
                             count={Math.max(
@@ -3612,13 +3619,6 @@ const OverviewPageContent = () => {
             )}
           </CardContent>
         </Card>
-        {canReadSecrets && (
-          <SecretFilesSection
-            projectId={projectId}
-            secretPath={secretPath}
-            visibleEnvs={visibleEnvs}
-          />
-        )}
       </div>
       <Sheet
         open={popUp.addSecretsInAllEnvs.isOpen}

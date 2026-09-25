@@ -14,7 +14,10 @@ export type TUploadSecretFileDTO = TProjectPermission &
     content: Buffer;
   };
 
-export type TListSecretFilesDTO = TProjectPermission & TSecretFileScope;
+export type TListSecretFilesDTO = TProjectPermission & {
+  environment: string;
+  secretPath?: string;
+};
 
 export type TDownloadSecretFileDTO = TProjectPermission & { fileId: string };
 

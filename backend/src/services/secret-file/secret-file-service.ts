@@ -163,14 +163,17 @@ export const secretFileServiceFactory = ({
   }: TListSecretFilesDTO) => {
     const { permission } = await getPermission({ actor, actorId, actorAuthMethod, actorOrgId, projectId });
 
+    // no path = env-wide listing; "/" scope keeps env-level grants working
     ForbiddenError.from(permission).throwUnlessCan(
       ProjectPermissionSecretActions.DescribeSecret,
-      subject(ProjectPermissionSub.Secrets, { environment, secretPath })
+      subject(ProjectPermissionSub.Secrets, { environment, secretPath: secretPath ?? "/" })
     );
 
     const env = await resolveEnv(projectId, environment);
-    const files = await secretFileDAL.findByEnvAndPath({ envId: env.id, secretPath });
-    return files.map((f) => toDto(f as TSecretFiles));
+    const files = secretPath
+      ? await secretFileDAL.findByEnvAndPath({ envId: env.id, secretPath })
+      : await secretFileDAL.findByEnv({ envId: env.id });
+    return files.map((f) => toDto(f as unknown as TSecretFiles));
   };
 
   const download = async ({ actor, actorId, actorAuthMethod, actorOrgId, projectId, fileId }: TDownloadSecretFileDTO) => {

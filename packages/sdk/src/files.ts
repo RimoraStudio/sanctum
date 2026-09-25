@@ -64,7 +64,7 @@ export const createFiles = (client: SanctumClient): FilesApi => ({
       query: {
         projectId: await resolveProjectId(client, scope),
         environment: scope.environment,
-        path: scope.path ?? "/"
+        path: scope.path
       } as Record<string, QueryValue>
     }),
 

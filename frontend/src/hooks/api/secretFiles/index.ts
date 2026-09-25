@@ -19,7 +19,7 @@ export type TSecretFile = {
 export type TGetSecretFilesDTO = {
   projectId: string;
   environment: string;
-  secretPath: string;
+  secretPath?: string;
 };
 
 export const secretFileKeys = {

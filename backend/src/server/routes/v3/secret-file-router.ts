@@ -26,6 +26,12 @@ const fileScopeQuery = z.object({
   path: z.string().trim().max(1024).default("/")
 });
 
+const listQuery = z.object({
+  projectId: z.string().trim().max(64),
+  environment: z.string().trim().max(64),
+  path: z.string().trim().max(1024).optional()
+});
+
 const uploadQuery = fileScopeQuery.extend({
   localPath: z.string().trim().max(1024).optional(),
   description: z.string().trim().max(1024).optional(),
@@ -83,7 +89,7 @@ export const registerSecretFileRouter = async (server: FastifyZodProvider) => {
     },
     schema: {
       hide: true,
-      querystring: fileScopeQuery,
+      querystring: listQuery,
       response: { 200: z.object({ files: z.array(secretFileSchema) }) }
     },
     onRequest: verifyAuth([AuthMode.JWT, AuthMode.IDENTITY_ACCESS_TOKEN]),

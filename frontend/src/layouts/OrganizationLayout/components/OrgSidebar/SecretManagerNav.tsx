@@ -1,4 +1,4 @@
-import { ActivityIcon, Blocks, BookCheck, FileText, Settings, Shield } from "lucide-react";
+import { ActivityIcon, Blocks, BookCheck, FileIcon, FileText, Settings, Shield } from "lucide-react";
 
 import { ProjectIcon, SidebarCollapsibleGroup } from "@app/components/v3";
 
@@ -22,6 +22,12 @@ export const SecretManagerNav = ({
       icon: ProjectIcon,
       pathSuffix: "overview",
       activeMatch: /\/secrets\//
+    },
+    {
+      label: "Files",
+      icon: FileIcon,
+      pathSuffix: "files",
+      activeMatch: /\/files/
     },
     {
       label: "Approvals",
