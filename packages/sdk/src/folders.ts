@@ -38,10 +38,10 @@ const resolveProjectId = async (client: SanctumClient, scope: FolderScope): Prom
 };
 
 export const createFolders = (client: SanctumClient): FoldersApi => ({
-  list: (scope) =>
+  list: async (scope) =>
     client.get<{ folders: Folder[] }>("/api/v2/folders", {
       query: {
-        projectId: scope.projectId,
+        projectId: await resolveProjectId(client, scope),
         environment: scope.environment,
         path: scope.path ?? "/"
       } as Record<string, QueryValue>

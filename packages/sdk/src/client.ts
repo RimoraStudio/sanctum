@@ -178,9 +178,16 @@ export class SanctumClient {
       payload = response.statusText;
     }
 
+    // error bodies nest message (object/array from zod) or arrive as plain text
+    const flatten = (v: unknown): string => {
+      if (typeof v === "string") return v;
+      if (Array.isArray(v)) return v.map(flatten).join("; ");
+      if (typeof v === "object" && v !== null && "message" in v) return flatten((v as { message: unknown }).message);
+      return JSON.stringify(v);
+    };
     const message =
       typeof payload === "object" && payload !== null && "message" in payload
-        ? String(payload.message)
+        ? flatten(payload.message)
         : typeof payload === "string"
           ? payload
           : response.statusText;
