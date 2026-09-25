@@ -144,7 +144,74 @@ const SecretFileTableRow = ({
             </div>
           </div>
         ) : (
-          fileName
+          <>
+            {fileName}
+            {(() => {
+              const envIdx = environments.findIndex(({ slug }) => getFileByName(slug, fileName));
+              const target = envIdx >= 0 ? getFileByName(environments[envIdx].slug, fileName)! : undefined;
+              if (!target) return null;
+              return (
+                <div
+                  className={twMerge(
+                    "absolute z-20 top-1/2 right-[3px] -translate-y-1/2",
+                    "flex items-center rounded-md border border-border bg-container-hover px-0.5 py-0.5 shadow-md",
+                    "pointer-events-none opacity-0 transition-all duration-300",
+                    "group-hover:pointer-events-auto group-hover:gap-1 group-hover:opacity-100"
+                  )}
+                >
+                  <Tooltip disableHoverableContent>
+                    <TooltipTrigger>
+                      <ProjectPermissionCan
+                        I={ProjectPermissionSecretActions.ReadValue}
+                        a={fileSubject(target, environments[envIdx].slug)}
+                      >
+                        {(isAllowed) => (
+                          <IconButton
+                            variant="ghost"
+                            size="xs"
+                            isDisabled={!isAllowed}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              void onDownload(target);
+                            }}
+                            className="w-0 overflow-hidden border-0 transition-all duration-300 group-hover:w-7"
+                          >
+                            <DownloadIcon />
+                          </IconButton>
+                        )}
+                      </ProjectPermissionCan>
+                    </TooltipTrigger>
+                    <TooltipContent>Download ({environments[envIdx].slug})</TooltipContent>
+                  </Tooltip>
+                  <Tooltip disableHoverableContent>
+                    <TooltipTrigger>
+                      <ProjectPermissionCan
+                        I={ProjectPermissionSecretActions.Delete}
+                        a={fileSubject(target, environments[envIdx].slug)}
+                      >
+                        {(isAllowed) => (
+                          <IconButton
+                            variant="ghost"
+                            size="xs"
+                            isDisabled={!isAllowed}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDelete(target);
+                            }}
+                            className="w-0 overflow-hidden border-0 transition-all duration-300 group-hover:w-7 hover:text-danger"
+                          >
+                            <Trash2Icon />
+                          </IconButton>
+                        )}
+                      </ProjectPermissionCan>
+                    </TooltipTrigger>
+                    <TooltipContent>Delete ({environments[envIdx].slug})</TooltipContent>
+                  </Tooltip>
+                </div>
+              );
+            })()}
+          </>
         )}
       </TableCell>
       {environments.length > 1 &&
