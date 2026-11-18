@@ -1,6 +1,6 @@
 import { ClipboardCheckIcon, Copy, Eye, EyeOff, ForwardIcon } from "lucide-react";
 
-import { Button, IconButton } from "@app/components/v3";
+import { IconButton } from "@app/components/v3";
 import { useTimedReset, useToggle } from "@app/hooks";
 import { TAccessSharedSecretResponse } from "@app/hooks/api/secretSharing";
 
@@ -83,15 +83,17 @@ export const SecretContainer = ({ secret, brandingTheme }: Props) => {
       </div>
       <SecretShareInfo secret={secret} brandingTheme={brandingTheme} />
       {!brandingTheme && (
-        <Button
-          className="mt-4 w-full"
-          variant="project"
-          size="lg"
-          onClick={() => window.open("/share-secret", "_blank", "noopener")}
-        >
-          Share Your Own Secret
-          <ForwardIcon />
-        </Button>
+        <div className="mt-4 flex justify-end border-t border-border/60 pt-3">
+          <a
+            href="/share-secret"
+            target="_blank"
+            rel="noopener"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-md px-2 text-xs text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            Share your own secret
+            <ForwardIcon aria-hidden="true" className="size-3.5" />
+          </a>
+        </div>
       )}
     </div>
   );
